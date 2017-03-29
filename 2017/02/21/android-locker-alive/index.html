@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="keywords"  content="">
+    <meta name="theme-color" content="#000000">
+    
+    <title>Magic Locker进程保活总结 - 李哲的博客 | Lizhe Blog</title>
+
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="http://lizhe.tech/pwa/manifest.json">
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="http://lizhe.tech/img/favicon.ico">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="http://localhost:4000http://lizhe.tech/2017/02/21/android-locker-alive/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="http://lizhe.tech/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="http://lizhe.tech/css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="http://lizhe.tech/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="http://lizhe.tech/">Lizhe Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="http://lizhe.tech/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="http://lizhe.tech/about/">About</a>
+                    </li>
+                    
+                    <li>
+                        <a href="http://lizhe.tech/tags/">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    var __HuxNav__ = {
+        close: function(){
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        },
+        open: function(){
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+
+    // Bind Event
+    $toggle.addEventListener('click', function(e){
+        if ($navbar.className.indexOf('in') > 0) {
+            __HuxNav__.close()
+        }else{
+            __HuxNav__.open()
+        }
+    })
+
+    /**
+     * Since Fastclick is used to delegate 'touchstart' globally
+     * to hack 300ms delay in iOS by performing a fake 'click',
+     * Using 'e.stopPropagation' to stop 'touchstart' event from 
+     * $toggle/$collapse will break global delegation.
+     * 
+     * Instead, we use a 'e.target' filter to prevent handler
+     * added to document close HuxNav.  
+     *
+     * Also, we use 'click' instead of 'touchstart' as compromise
+     */
+    document.addEventListener('click', function(e){
+        if(e.target == $toggle) return;
+        if(e.target.className == 'icon-bar') return;
+        __HuxNav__.close();
+    })
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="http://lizhe.tech/img/home-bg-new.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        position: relative;
+        background-image: url('http://lizhe.tech/img/home-bg-new.jpg')
+    }
+
+    
+    header.intro-header .header-mask{
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        background: rgba(0,0,0, 0.2);
+    }
+    
+</style>
+<header class="intro-header" >
+    <div class="header-mask"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="http://lizhe.tech/tags/#Android" title="Android">Android</a>
+                        
+                        <a class="tag" href="http://lizhe.tech/tags/#锁屏" title="锁屏">锁屏</a>
+                        
+                        <a class="tag" href="http://lizhe.tech/tags/#保活" title="保活">保活</a>
+                        
+                    </div>
+                    <h1>Magic Locker进程保活总结</h1>
+                    
+                    
+                    <h2 class="subheading">How Magic Locker keeps itself alive</h2>
+                    
+                    <span class="meta">Posted by Lizhe on February 21, 2017</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				<h2 id="一进程的优先级">一、进程的优先级</h2>
+
+<p>Android系统将应用进程分为五级。必要时，按照从低到高顺序进行回收。</p>
+
+<ul>
+  <li>（最高）前台进程——Foreground process
+用户当前操作所必需的进程。通常在任意给定时间前台进程都为数不多。只有在内存不足以支持它们同时继续运行这一万不得已的情况下，系统才会终止它们。
+    <ul>
+      <li>正在交互的Activity，已调用onResume()</li>
+      <li>拥有某个 Service，后者绑定到用户正在交互的 Activity</li>
+      <li>拥有正在“前台”运行的 Service（服务已调用  startForeground()）</li>
+      <li>拥有正执行一个生命周期回调的 Service（onCreate()、onStart()或 onDestroy()）</li>
+      <li>拥有正执行其  onReceive() 方法的 BroadcastReceiver</li>
+    </ul>
+  </li>
+  <li>（高）可见进程——Visible process
+没有任何前台组件、但仍会影响用户在屏幕上所见内容的进程。可见进程被视为是极其重要的进程，除非为了维持所有前台进程同时运行而必须终止，否则系统不会终止这些进程。
+    <ul>
+      <li>拥有不在前台、但仍对用户可见的 Activity（已调用  onPause()）</li>
+      <li>拥有绑定到可见（或前台）Activity 的 Service</li>
+    </ul>
+  </li>
+  <li>（中）服务进程——Service process
+尽管服务进程与用户所见内容没有直接关联，但是它们通常在执行一些用户关心的操作（例如，在后台播放音乐或从网络下载数据）。因此，除非内存不足以维持所有前台进程和可见进程同时运行，否则系统会让服务进程保持运行状态。
+    <ul>
+      <li>正在运行  startService() 方法启动的服务，且不属于上述两个更高类别进程的进程。</li>
+    </ul>
+  </li>
+  <li>（低）后台进程——Background process
+后台进程对用户体验没有直接影响，系统可能随时终止它们，以回收内存供前台进程、可见进程或服务进程使用。 通常会有很多后台进程在运行，因此它们会保存在 LRU 列表中，以确保包含用户最近查看的Activity的进程最后一个被终止。
+    <ul>
+      <li>对用户不可见的 Activity 的进程（已调用  Activity的onStop() 方法）</li>
+    </ul>
+  </li>
+  <li>（最低）空进程——Empty process
+保留这种进程的的唯一目的是用作缓存，以缩短下次在其中运行组件所需的启动时间。</li>
+</ul>
+
+<h2 id="二进程回收策略">二、进程回收策略</h2>
+<p>Android 中对于内存的回收，主要依靠 Lowmemorykiller 来完成，是一种根据 OOM_ADJ 阈值级别触发相应力度的内存回收的机制。
+<img src="../../../../img/in-post/post-android-locker-keep-alive/recycle_order.jpg" alt="" /></p>
+
+<h2 id="三免死牌">三、免死牌</h2>
+
+<h4 id="31-原理">3.1 原理</h4>
+<p>想要不被系统杀死，就要告诉系统我很重要，即提高自己的进程优先级。<br />
+Magic Locker中LockService在OnStartCommand中通过startForeground方法向系统发送一个Notification，将自身的Service优先级从4提升到2，大大降低了被杀死的概率。</p>
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="nd">@Override</span>
+<span class="kd">public</span> <span class="kt">int</span> <span class="nf">onStartCommand</span><span class="o">(</span><span class="n">Intent</span> <span class="n">intent</span><span class="o">,</span> <span class="kt">int</span> <span class="n">flags</span><span class="o">,</span> <span class="kt">int</span> <span class="n">startId</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">HSLog</span><span class="o">.</span><span class="na">d</span><span class="o">(</span><span class="s">"onStartCommand(), intent = "</span> <span class="o">+</span> <span class="n">intent</span><span class="o">);</span>
+    <span class="kt">boolean</span> <span class="n">shutDownLock</span> <span class="o">=</span> <span class="n">UserSettings</span><span class="o">.</span><span class="na">getShutDown</span><span class="o">();</span>
+    <span class="k">if</span> <span class="o">(!</span><span class="n">setForeground</span><span class="o">)</span> <span class="o">{</span>
+    	<span class="c1">// 关键，发送foreground通知，第一个参数为通知id</span>
+        <span class="n">startForeground</span><span class="o">(</span><span class="n">LockNotificationMgr</span><span class="o">.</span><span class="na">NOTIFICATION_ID_FOREGROUND</span><span class="o">,</span> <span class="n">LockNotificationMgr</span><span class="o">.</span><span class="na">getInstance</span><span class="o">().</span><span class="na">getForegroundNotification</span><span class="o">());</span>
+        <span class="c1">// 启动LockServicePhantom</span>
+        <span class="n">startService</span><span class="o">(</span><span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="n">LockServicePhantom</span><span class="o">.</span><span class="na">class</span><span class="o">));</span>
+        <span class="n">setForeground</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kt">boolean</span> <span class="n">bootCompleted</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">intent</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">bootCompleted</span> <span class="o">=</span> <span class="n">intent</span><span class="o">.</span><span class="na">getBooleanExtra</span><span class="o">(</span><span class="n">BootReceiver</span><span class="o">.</span><span class="na">EXTRA_BOOT_COMPLETED</span><span class="o">,</span> <span class="kc">false</span><span class="o">);</span>
+    <span class="o">}</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">bootCompleted</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">UserSettings</span><span class="o">.</span><span class="na">setShutDown</span><span class="o">(</span><span class="kc">false</span><span class="o">);</span>
+        <span class="n">shutDownLock</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+    <span class="o">}</span>
+    <span class="n">HSLog</span><span class="o">.</span><span class="na">i</span><span class="o">(</span><span class="s">"shut down == "</span> <span class="o">+</span> <span class="n">shutDownLock</span><span class="o">);</span>
+
+    <span class="k">if</span> <span class="o">(</span><span class="n">shutDownLock</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">locked</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">FloatWindowController</span><span class="o">.</span><span class="na">getInstance</span><span class="o">().</span><span class="na">showLockScreen</span><span class="o">();</span>
+        <span class="n">locked</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+    <span class="o">}</span>
+    <span class="k">return</span> <span class="n">START_STICKY</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre>
+</div>
+<p>既然发了通知，那么就能在系统通知栏上看见。为了不让用户感知，使用了一种hack的方法。上面代码中可以看到，我们启动了名字为LockServicePhantom的Service。</p>
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">LockServicePhantom</span> <span class="kd">extends</span> <span class="n">Service</span> <span class="o">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">IBinder</span> <span class="nf">onBind</span><span class="o">(</span><span class="n">Intent</span> <span class="n">intent</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">onStartCommand</span><span class="o">(</span><span class="n">Intent</span> <span class="n">intent</span><span class="o">,</span> <span class="kt">int</span> <span class="n">flags</span><span class="o">,</span> <span class="kt">int</span> <span class="n">startId</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">Notification</span> <span class="n">localNotification</span> <span class="o">=</span> <span class="n">LockNotificationMgr</span><span class="o">.</span><span class="na">getInstance</span><span class="o">().</span><span class="na">getForegroundNotification</span><span class="o">();</span>
+        <span class="c1">// 发送一个相同id的通知，顶掉LockService发的</span>
+        <span class="n">startForeground</span><span class="o">(</span><span class="n">LockNotificationMgr</span><span class="o">.</span><span class="na">NOTIFICATION_ID_FOREGROUND</span><span class="o">,</span> <span class="n">localNotification</span><span class="o">);</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="c1">// 隐藏通知，参数为bool removeNotification.</span>
+            <span class="n">stopForeground</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+            <span class="n">stopSelf</span><span class="o">();</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">Exception</span> <span class="n">exception</span><span class="o">)</span> <span class="o">{</span>
+            
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="n">START_NOT_STICKY</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre>
+</div>
+<p>这个类就是来隐藏通知的，它startForeground之后立马stopForeground。
+stopForeground的时候告诉系统，我不要前台优先级了，顺便把我的前台通知移除吧！然后系统就移除了。</p>
+<h4 id="32-隐藏通知在711以后失效">3.2 隐藏通知在7.1.1以后失效</h4>
+<p>为何失效了，因为大家都用上面的方案提升自己的进程优先级，所以谷爹修复了这个bug。<br />
+见 android-25 源码里services/core/java/com/android/server/am/ActiveServices.java，这是系统移除前台通知的地方。</p>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="c1">// 下面代码里的英文注释，一读就明白谷爹做了啥。</span>
+<span class="kd">private</span> <span class="kt">void</span> <span class="nf">cancelForegroudNotificationLocked</span><span class="o">(</span><span class="n">ServiceRecord</span> <span class="n">r</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">r</span><span class="o">.</span><span class="na">foregroundId</span> <span class="o">!=</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">// First check to see if this app has any other active foreground services</span>
+        <span class="c1">// with the same notification ID.  If so, we shouldn't actually cancel it,</span>
+        <span class="c1">// because that would wipe away the notification that still needs to be shown</span>
+        <span class="c1">// due the other service.</span>
+        <span class="n">ServiceMap</span> <span class="n">sm</span> <span class="o">=</span> <span class="n">getServiceMap</span><span class="o">(</span><span class="n">r</span><span class="o">.</span><span class="na">userId</span><span class="o">);</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">sm</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="na">mServicesByName</span><span class="o">.</span><span class="na">size</span><span class="o">()-</span><span class="mi">1</span><span class="o">;</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span><span class="o">--)</span> <span class="o">{</span>
+                <span class="n">ServiceRecord</span> <span class="n">other</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="na">mServicesByName</span><span class="o">.</span><span class="na">valueAt</span><span class="o">(</span><span class="n">i</span><span class="o">);</span>
+                <span class="k">if</span> <span class="o">(</span><span class="n">other</span> <span class="o">!=</span> <span class="n">r</span> <span class="o">&amp;&amp;</span> <span class="n">other</span><span class="o">.</span><span class="na">foregroundId</span> <span class="o">==</span> <span class="n">r</span><span class="o">.</span><span class="na">foregroundId</span>
+                        <span class="o">&amp;&amp;</span> <span class="n">other</span><span class="o">.</span><span class="na">packageName</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">r</span><span class="o">.</span><span class="na">packageName</span><span class="o">))</span> <span class="o">{</span>
+                    <span class="c1">// Found one!  Abort the cancel.😈😈🤑🤑🙄🙄</span>
+                    <span class="k">return</span><span class="o">;</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+        <span class="n">r</span><span class="o">.</span><span class="na">cancelNotification</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre>
+</div>
+<h2 id="四春哥药">四、春哥药</h2>
+<p>在我们使用了上面的方案免死以后，被系统回收的概率已经很低了。但是面对市面上各种系统级或是第三方的清理软件，它们可不管什么进程优先级，不在自己白名单里的全部杀死，“非我族类，其心必异”。经过调查，这些清理（电池管理）软件，大多数都是通过forceStop手段去杀死进程。要么是通过AccessibilityService提供的模拟点击app管理里force stop按钮来实现，要么是通过am force-stop pkgName命令来做。</p>
+
+<p>凑巧的是，我们不经意间发现了一个结论：在Magic Locker获得Notification Access权限以后，被forceStop以后会立马重新启动。即Notification Access权限的赋予就是那剂春哥药。</p>
+
+<p>为了研究明白原因，我查阅了很多相关资料，只有<a href="http://blog.csdn.net/aigestudio/article/details/51348408">论Android应用进程长存的可行性</a>这篇提到了这个很bug的事情。这篇文章的作者说他很想以后单开一篇把原理写一下，然而他太监了。</p>
+
+<p>无奈，只能Read the Fucking Source Code。</p>
+<h4 id="41-溯源">4.1 溯源</h4>
+<p>首先我们发现，和forceStop相关的实现在ActivityManagerService（AMS）内部，和NotificationListenerService相关的管理在NotificationManagerService（NMS）。</p>
+
+<p>AMS是一个2w多行的复杂类，好在我们只需要关心forceStop相关的逻辑。NMS则只有2k多行。</p>
+
+<h4 id="42-寻迹">4.2 寻迹</h4>
+<p>既然我们确定AMS中forceStop会和NMS的某种机制相关联，那么这两个系统Service肯定有通信。
+即肯定是Broadcast方式或者getSystemService方式两种之一，搜索的范围大大缩小。</p>
+
+<h5 id="421-amsforcestoppackagelocked">4.2.1 AMS.forceStopPackageLocked</h5>
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kd">private</span> <span class="kt">void</span> <span class="nf">forceStopPackageLocked</span><span class="o">(</span><span class="kd">final</span> <span class="n">String</span> <span class="n">packageName</span><span class="o">,</span> <span class="kt">int</span> <span class="n">uid</span><span class="o">,</span> <span class="n">String</span> <span class="n">reason</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">forceStopPackageLocked</span><span class="o">(</span><span class="n">packageName</span><span class="o">,</span> <span class="n">UserHandle</span><span class="o">.</span><span class="na">getAppId</span><span class="o">(</span><span class="n">uid</span><span class="o">),</span> <span class="kc">false</span><span class="o">,</span>
+                <span class="kc">false</span><span class="o">,</span> <span class="kc">true</span><span class="o">,</span> <span class="kc">false</span><span class="o">,</span> <span class="kc">false</span><span class="o">,</span> <span class="n">UserHandle</span><span class="o">.</span><span class="na">getUserId</span><span class="o">(</span><span class="n">uid</span><span class="o">),</span> <span class="n">reason</span><span class="o">);</span>
+
+    <span class="n">Intent</span> <span class="n">intent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">ACTION_PACKAGE_RESTARTED</span><span class="o">,</span>
+                <span class="n">Uri</span><span class="o">.</span><span class="na">fromParts</span><span class="o">(</span><span class="s">"package"</span><span class="o">,</span> <span class="n">packageName</span><span class="o">,</span> <span class="kc">null</span><span class="o">));</span>
+    <span class="c1">//系统启动完毕后,则mProcessesReady=true</span>
+    <span class="k">if</span> <span class="o">(!</span><span class="n">mProcessesReady</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">intent</span><span class="o">.</span><span class="na">addFlags</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">FLAG_RECEIVER_REGISTERED_ONLY</span>
+                        <span class="o">|</span> <span class="n">Intent</span><span class="o">.</span><span class="na">FLAG_RECEIVER_FOREGROUND</span><span class="o">);</span>
+    <span class="o">}</span>
+    <span class="n">intent</span><span class="o">.</span><span class="na">putExtra</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">EXTRA_UID</span><span class="o">,</span> <span class="n">uid</span><span class="o">);</span>
+    <span class="n">intent</span><span class="o">.</span><span class="na">putExtra</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">EXTRA_USER_HANDLE</span><span class="o">,</span> <span class="n">UserHandle</span><span class="o">.</span><span class="na">getUserId</span><span class="o">(</span><span class="n">uid</span><span class="o">));</span>
+    <span class="c1">//发送广播ACTION_PACKAGE_RESTARTED用于停止alarm和清除通知</span>
+    <span class="n">broadcastIntentLocked</span><span class="o">(</span><span class="kc">null</span><span class="o">,</span> <span class="kc">null</span><span class="o">,</span> <span class="n">intent</span><span class="o">,</span>
+                    <span class="kc">null</span><span class="o">,</span> <span class="kc">null</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="kc">null</span><span class="o">,</span> <span class="kc">null</span><span class="o">,</span> <span class="kc">null</span><span class="o">,</span> <span class="n">AppOpsManager</span><span class="o">.</span><span class="na">OP_NONE</span><span class="o">,</span>
+                    <span class="kc">null</span><span class="o">,</span> <span class="kc">false</span><span class="o">,</span> <span class="kc">false</span><span class="o">,</span> <span class="n">MY_PID</span><span class="o">,</span> <span class="n">Process</span><span class="o">.</span><span class="na">SYSTEM_UID</span><span class="o">,</span> <span class="n">UserHandle</span><span class="o">.</span><span class="na">getUserId</span><span class="o">(</span><span class="n">uid</span><span class="o">));</span>
+<span class="o">}</span>
+</code></pre>
+</div>
+<h5 id="422-nmsconstuctor">4.2.2 NMS.Constuctor</h5>
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="n">IntentFilter</span> <span class="n">pkgFilter</span> <span class="o">=</span> <span class="k">new</span> <span class="n">IntentFilter</span><span class="o">();</span>
+<span class="n">pkgFilter</span><span class="o">.</span><span class="na">addAction</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">ACTION_PACKAGE_ADDED</span><span class="o">);</span>
+<span class="n">pkgFilter</span><span class="o">.</span><span class="na">addAction</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">ACTION_PACKAGE_REMOVED</span><span class="o">);</span>
+<span class="n">pkgFilter</span><span class="o">.</span><span class="na">addAction</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">ACTION_PACKAGE_CHANGED</span><span class="o">);</span>
+<span class="n">pkgFilter</span><span class="o">.</span><span class="na">addAction</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">ACTION_PACKAGE_RESTARTED</span><span class="o">);</span>
+<span class="n">pkgFilter</span><span class="o">.</span><span class="na">addAction</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">ACTION_QUERY_PACKAGE_RESTART</span><span class="o">);</span>
+<span class="n">pkgFilter</span><span class="o">.</span><span class="na">addDataScheme</span><span class="o">(</span><span class="s">"package"</span><span class="o">);</span>
+<span class="n">mContext</span><span class="o">.</span><span class="na">registerReceiver</span><span class="o">(</span><span class="n">mIntentReceiver</span><span class="o">,</span> <span class="n">pkgFilter</span><span class="o">);</span>
+</code></pre>
+</div>
+
+<p>通过上面的观察可以看出，AMS.forceStopPackageLocked发送了Intent.ACTION_PACKAGE_RESTARTED, NMS在构造函数里监听了Intent.ACTION_PACKAGE_RESTARTED。</p>
+<h4 id="43-释因">4.3 释因</h4>
+<p>可以假设这么一个场景：写AMS.forceStopPackageLocked的程序员接到了一个需求，即当app被forceStop以后需要清除该app的所有通知；他在NMS里看到，ACTION_PACKAGE_RESTARTED广播收到后做了清除通知的动作，所以就发送了这个Broadcast。</p>
+
+<p>有趣的是，NMS在接到ACTION_PACKAGE_RESTARTED之后，还做了别的事情。</p>
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kd">private</span> <span class="n">BroadcastReceiver</span> <span class="n">mIntentReceiver</span> <span class="o">=</span> <span class="k">new</span> <span class="n">BroadcastReceiver</span><span class="o">()</span> <span class="o">{</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onReceive</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">,</span> <span class="n">Intent</span> <span class="n">intent</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">// 省略。。。</span>
+
+        <span class="k">if</span> <span class="o">(</span><span class="n">action</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">ACTION_PACKAGE_ADDED</span><span class="o">)</span>
+                <span class="o">||</span> <span class="o">(</span><span class="n">queryRemove</span><span class="o">=</span><span class="n">action</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">ACTION_PACKAGE_REMOVED</span><span class="o">))</span>
+                <span class="o">||</span> <span class="n">action</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">ACTION_PACKAGE_RESTARTED</span><span class="o">)</span>
+                <span class="o">||</span> <span class="o">(</span><span class="n">packageChanged</span><span class="o">=</span><span class="n">action</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">ACTION_PACKAGE_CHANGED</span><span class="o">))</span>
+                <span class="o">||</span> <span class="o">(</span><span class="n">queryRestart</span><span class="o">=</span><span class="n">action</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">ACTION_QUERY_PACKAGE_RESTART</span><span class="o">))</span>
+                <span class="o">||</span> <span class="n">action</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE</span><span class="o">))</span> <span class="o">{</span>
+
+            <span class="c1">// 下面一大段获取intent相关pkgList</span>
+            <span class="n">String</span> <span class="n">pkgList</span><span class="o">[]</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+            <span class="err">……………………</span>
+            <span class="err">……………………</span>
+
+            <span class="c1">// pkgList是否涉及到打开了Notification Access权限的app</span>
+            <span class="kt">boolean</span> <span class="n">anyListenersInvolved</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">pkgList</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="o">(</span><span class="n">pkgList</span><span class="o">.</span><span class="na">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">))</span> <span class="o">{</span>
+                <span class="k">for</span> <span class="o">(</span><span class="n">String</span> <span class="n">pkgName</span> <span class="o">:</span> <span class="n">pkgList</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="k">if</span> <span class="o">(</span><span class="n">cancelNotifications</span><span class="o">)</span> <span class="o">{</span>
+                        <span class="c1">// 清除Notification</span>
+                        <span class="n">cancelAllNotificationsInt</span><span class="o">(</span><span class="n">pkgName</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="o">!</span><span class="n">queryRestart</span><span class="o">,</span>
+                                <span class="n">UserHandle</span><span class="o">.</span><span class="na">USER_ALL</span><span class="o">);</span>
+                    <span class="o">}</span>
+                    <span class="k">if</span> <span class="o">(</span><span class="n">mEnabledListenerPackageNames</span><span class="o">.</span><span class="na">contains</span><span class="o">(</span><span class="n">pkgName</span><span class="o">))</span> <span class="o">{</span>
+                        <span class="n">anyListenersInvolved</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+                    <span class="o">}</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">anyListenersInvolved</span><span class="o">)</span> <span class="o">{</span>
+                <span class="c1">// if we're not replacing a package, clean up orphaned bits</span>
+                <span class="k">if</span> <span class="o">(!</span><span class="n">queryReplace</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">disableNonexistentListeners</span><span class="o">();</span>
+                <span class="o">}</span>
+                <span class="c1">// make sure we're still bound to any of our</span>
+                <span class="c1">// listeners who may have just upgraded</span>
+                <span class="c1">// 确保那些注册了listener的Service活着，导致死掉的app重启</span>
+                <span class="n">rebindListenerServices</span><span class="o">();</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+        <span class="c1">// 省略。。。</span>
+        <span class="c1">// 。。。</span>
+    <span class="o">}</span>
+<span class="o">};</span>
+</code></pre>
+</div>
+<p>写这个BroadcastReceiver的程序猿考虑的很全面，他在收到广播时重新确保了拥有Notification Access权限App的Service连接，即调用了rebindListenerService方法。</p>
+
+<p>但他应该没想到，在forceStop之后也会走这儿的逻辑导致程序重新启动，即应用被forceStop后马上拉活。</p>
+
+<h4 id="44-预言">4.4 预言</h4>
+<p>既然这是个bug，则可以被修复。<br />
+可能在不久的将来，谷歌单独加了某名叫Intent.ACTION_PACKAGE_FORCE_STOPPED的广播，AMS和PMS通过该广播通讯，则rebindListenerServices将不被调用，利用Notification Access权限复活的方案随之失效。</p>
+
+
+
+                <hr style="visibility: hidden;">
+
+                
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="http://lizhe.tech/2017/02/20/android-accessibility/index.html" data-toggle="tooltip" data-placement="top" title="Android无障碍功能介绍">
+                        Previous<br>
+                        <span>Android无障碍功能介绍</span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="http://lizhe.tech/2017/02/22/android-accessibility-disabled/index.html" data-toggle="tooltip" data-placement="top" title="为何Accessibility权限总被无故关闭">
+                        Next<br>
+                        <span>为何Accessibility权限总被无故关闭</span>
+                        </a>
+                    </li>
+                    
+                </ul>
+
+
+                
+
+                
+
+            </div>  
+
+    <!-- Side Catalog Container -->
+        
+            <div class="
+                col-lg-2 col-lg-offset-0
+                visible-lg-block
+                sidebar-container
+                catalog-container">
+                <div class="side-catalog">
+                    <hr class="hidden-sm hidden-xs">
+                    <h5>
+                        <a class="catalog-toggle" href="#">CATALOG</a>
+                    </h5>
+                    <ul class="catalog-body"></ul>
+                </div>
+            </div>
+        
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+        				
+                            
+                				<a href="/tags/#Android" title="Android" rel="12">
+                                    Android
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#性能" title="性能" rel="2">
+                                    性能
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Accessibility" title="Accessibility" rel="2">
+                                    Accessibility
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#锁屏" title="锁屏" rel="4">
+                                    锁屏
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+        			</div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+                    
+                        <li><a href="http://gank.io/">干货集中营</a></li>
+                    
+                        <li><a href="http://mida.re/">乱序</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("//cdnjs.cloudflare.com/ajax/libs/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    
+
+
+                    
+                    
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Lizhe Blog 2017
+                    |
+                    <!-- Theme by <a href="http://huangxuan.me">Hux</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=huxpro&repo=huxpro.github.io&type=star&count=true" >
+                    </iframe> -->
+                    Powered by <a href="https://jekyllrb.com/">Jekyll</a> with <a href="https://github.com/Kaijun/hexo-theme-huxblog">Hux</a> Theme
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="http://lizhe.tech/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="http://lizhe.tech/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="http://lizhe.tech/js/hux-blog.min.js "></script>
+
+<!-- Service Worker -->
+
+<script type="text/javascript">
+    if(navigator.serviceWorker){
+        // For security reasons, a service worker can only control the pages that are in the same directory level or below it. That's why we put sw.js at ROOT level.
+        navigator.serviceWorker
+            .register('/sw.js')
+            .then((registration) => {console.log('Service Worker Registered. ', registration)})
+            .catch((error) => {console.log('ServiceWorker registration failed: ', error)})
+    }
+</script>
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/ 
+     - https://github.com/jneen/rouge/wiki/list-of-supported-languages-and-lexers   
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async('http://lizhe.tech/js/jquery.tagcloud.js',function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-49627206-1';
+    var _gaDomain = 'huangxuan.me';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+
+<!-- Side Catalog -->
+
+<script type="text/javascript">
+    function generateCatalog (selector) {
+        var P = $('div.post-container'),a,n,t,l,i,c;
+        a = P.find('h1,h2,h3,h4,h5,h6');
+        a.each(function () {
+            n = $(this).prop('tagName').toLowerCase();
+            i = "#"+$(this).prop('id');
+            t = $(this).text();
+            c = $('<a href="'+i+'" rel="nofollow">'+t+'</a>');
+            l = $('<li class="'+n+'_nav"></li>').append(c);
+            $(selector).append(l);
+        });
+        return true;    
+    }
+
+    generateCatalog(".catalog-body");
+
+    // toggle side catalog
+    $(".catalog-toggle").click((function(e){
+        e.preventDefault();
+        $('.side-catalog').toggleClass("fold")
+    }))
+
+    /*
+     * Doc: https://github.com/davist11/jQuery-One-Page-Nav
+     * Fork by Hux to support padding
+     */
+    async("http://lizhe.tech/js/jquery.nav.js", function () {
+        $('.catalog-body').onePageNav({
+            currentClass: "active",
+            changeHash: !1,
+            easing: "swing",
+            filter: "",
+            scrollSpeed: 700,
+            scrollOffset: 0,
+            scrollThreshold: .2,
+            begin: null,
+            end: null,
+            scrollChange: null,
+            padding: 80
+        });
+    });
+</script>
+
+
+
+
+
+<!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0" /> -->
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

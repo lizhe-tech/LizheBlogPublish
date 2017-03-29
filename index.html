@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="keywords"  content="">
+    <meta name="theme-color" content="#000000">
+    
+    <title>李哲的博客 | Lizhe Blog</title>
+
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="http://lizhe.tech/pwa/manifest.json">
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="http://lizhe.tech/img/favicon.ico">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="http://localhost:4000http://lizhe.tech/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="http://lizhe.tech/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="http://lizhe.tech/css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="http://lizhe.tech/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="http://lizhe.tech/">Lizhe Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="http://lizhe.tech/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="http://lizhe.tech/about/">About</a>
+                    </li>
+                    
+                    <li>
+                        <a href="http://lizhe.tech/tags/">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    var __HuxNav__ = {
+        close: function(){
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        },
+        open: function(){
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+
+    // Bind Event
+    $toggle.addEventListener('click', function(e){
+        if ($navbar.className.indexOf('in') > 0) {
+            __HuxNav__.close()
+        }else{
+            __HuxNav__.open()
+        }
+    })
+
+    /**
+     * Since Fastclick is used to delegate 'touchstart' globally
+     * to hack 300ms delay in iOS by performing a fake 'click',
+     * Using 'e.stopPropagation' to stop 'touchstart' event from 
+     * $toggle/$collapse will break global delegation.
+     * 
+     * Instead, we use a 'e.target' filter to prevent handler
+     * added to document close HuxNav.  
+     *
+     * Also, we use 'click' instead of 'touchstart' as compromise
+     */
+    document.addEventListener('click', function(e){
+        if(e.target == $toggle) return;
+        if(e.target.className == 'icon-bar') return;
+        __HuxNav__.close();
+    })
+</script>
+
+
+    <!-- Page Header -->
+<header class="intro-header" style="background-image: url('http://lizhe.tech/img/home-bg-new.jpg')">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 ">
+                <div class="site-heading">
+                    <h1>Lizhe Blog</h1>
+                    <!--<hr class="small">-->
+                    <span class="subheading">It's never right to give up halfway.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Main Content -->
+<div class="container">
+	<div class="row">
+        
+
+<!-- USE SIDEBAR -->
+    <!-- PostList Container -->
+    		<div class="
+                col-lg-8 col-lg-offset-1
+                col-md-8 col-md-offset-1
+                col-sm-12
+                col-xs-12
+                postlist-container
+            ">
+    			
+<div class="post-preview">
+    <a href="http://lizhe.tech/2017/03/23/android-locker-summarize/index.html">
+        <h2 class="post-title">
+            Android锁屏的选型方式——Activity or Window
+        </h2>
+        
+        <h3 class="post-subtitle">
+            How to Make a Locker——Use Activity or Window
+        </h3>
+        
+        <div class="post-content-preview">
+            锁屏根据产品类型可分为
+
+  独立锁屏应用，如CM Locker、Magic Locker等。
+这种锁屏的价值在于向用户提供个性化、安全性服务。
+  应用内锁屏Feature，如各Launcher、各清理软件、各工具软件内带有的锁屏功能。
+这种锁屏仅仅是一种流量变现的手段，利用用户的麻木或愚昧，抢占高频锁屏场景。通常带有大幅原生广告甚至全屏广告，并不向用户提供个性化、安全性服务。
+
+
+根据技...
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by Lizhe on March 23, 2017
+    </p>
+</div>
+<hr>
+
+<div class="post-preview">
+    <a href="http://lizhe.tech/2017/03/20/mac-tree-command/index.html">
+        <h2 class="post-title">
+            Mac显示目录结构Tree命令
+        </h2>
+        
+        <h3 class="post-subtitle">
+            Activity Startup Re-arrangement on Post-Nougat Devices
+        </h3>
+        
+        <div class="post-content-preview">
+            mac下默认没有tree命令，需要安装：
+
+brew install tree
+
+
+
+[tree -L 1]   指定层级
+
+.
+├── Applications
+├── Applications\ (Parallels)
+├── Desktop
+├── Documents
+├── Downloads
+├── Library
+├── Movies
+├── Music
+├── Pictures...
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by Lizhe on March 20, 2017
+    </p>
+</div>
+<hr>
+
+<div class="post-preview">
+    <a href="http://lizhe.tech/2017/03/15/font-clip/index.html">
+        <h2 class="post-title">
+            减小包体积之字体提取
+        </h2>
+        
+        <h3 class="post-subtitle">
+            Font Clipping to Reduce Package Size
+        </h3>
+        
+        <div class="post-content-preview">
+            时间Widget个性化只需要一个字体文件的’0~9’和’:’。本着精益求精的精神，最大化降低不必要的包体积增长，需要将字体文件中的有用字符提取出来。
+
+不幸的是组里没人拥有这个技能，索性把这个活揽过来了。
+
+1. 拥有字体
+
+昨天晚上从设计那里求来了目标字体：Akrobat-Light.otf (57KB, OpenType font)。
+
+2. 提取字体——sfnttool
+
+sfntto...
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by Lizhe on March 15, 2017
+    </p>
+</div>
+<hr>
+
+<div class="post-preview">
+    <a href="http://lizhe.tech/2017/03/11/android-coordinatelayout-space-ahead/index.html">
+        <h2 class="post-title">
+            记Android CoordinateLayout使用的一个坑
+        </h2>
+        
+        <h3 class="post-subtitle">
+            A Tip When Using CoordinateLayout
+        </h3>
+        
+        <div class="post-content-preview">
+            
+
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by Lizhe on March 11, 2017
+    </p>
+</div>
+<hr>
+
+<div class="post-preview">
+    <a href="http://lizhe.tech/2017/03/10/android-locker-show-slow/index.html">
+        <h2 class="post-title">
+            Android自定义锁屏显示速度的优化
+        </h2>
+        
+        <h3 class="post-subtitle">
+            Optimization of Charing Screen's Display Speed
+        </h3>
+        
+        <div class="post-content-preview">
+            1. 问题提出
+在做公司充电锁屏feature的时候发现锁屏Activity出现的太慢，探讨一下原因。
+
+充电锁屏Activity出现分两步
+
+  注册并接收系统SCREEN_ON和SCREEN_OFF广播
+  接收到广播后，使用startActivity将充电锁屏启动
+
+
+代码如下
+final IntentFilter screenFilter = new IntentFilter();
+...
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by Lizhe on March 10, 2017
+    </p>
+</div>
+<hr>
+
+<div class="post-preview">
+    <a href="http://lizhe.tech/2017/03/09/android-charging-screen-blinks/index.html">
+        <h2 class="post-title">
+            Android自定义锁屏和系统锁屏冲突并闪烁
+        </h2>
+        
+        <h3 class="post-subtitle">
+            Custom Locker Blinking With Android System Locker
+        </h3>
+        
+        <div class="post-content-preview">
+            
+
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by Lizhe on March 9, 2017
+    </p>
+</div>
+<hr>
+
+<div class="post-preview">
+    <a href="http://lizhe.tech/2017/03/08/android-system-unlock-programmatically/index.html">
+        <h2 class="post-title">
+            Android强制显示系统解锁页
+        </h2>
+        
+        <h3 class="post-subtitle">
+            Force Show Unlock View Programmatically When System Locker's Showing
+        </h3>
+        
+        <div class="post-content-preview">
+            近期做充电锁屏需求，在研究竞品的过程中，发现360Security能够自动调起系统的解锁页，感觉很神奇。
+
+
+
+首先想到的是系统提供了解锁意图的广播或者Intent，接到后会调起解锁页，但是经过调研后并没有找到。所以只能逆向一下360Security，看它怎么搞出来的。
+
+1. 下载apk
+这里记一个很方便能够搜索下载apk的网站：http://www.coolapk.com/(酷安网)。
+...
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by Lizhe on March 8, 2017
+    </p>
+</div>
+<hr>
+
+<div class="post-preview">
+    <a href="http://lizhe.tech/2017/03/06/android-easter-eggs/index.html">
+        <h2 class="post-title">
+            Android源码中的那些彩蛋
+        </h2>
+        
+        <h3 class="post-subtitle">
+            Easter Eggs in AOSP
+        </h3>
+        
+        <div class="post-content-preview">
+            最近看android源码和论坛的时候遇到了一些很好玩的代码，总结出来搞个乐子。
+
+1. Let’s party like it’s 1995!
+
+View createViewFromTag(View parent, String name, Context context, AttributeSet attrs, boolean ignoreThemeAttr) {
+
+        pr...
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by Lizhe on March 6, 2017
+    </p>
+</div>
+<hr>
+
+<div class="post-preview">
+    <a href="http://lizhe.tech/2017/02/24/android-window-remove-bug/index.html">
+        <h2 class="post-title">
+            记Android WindowManager使用的一个坑
+        </h2>
+        
+        <h3 class="post-subtitle">
+            Encountered a bug in WindowManager.removeView
+        </h3>
+        
+        <div class="post-content-preview">
+            最近在使用WindowManager.removeView(View view)时遇到一个坑。
+
+
+
+我的做法是：把LockWindow动画到透明度为0，并在动画的onAnimationEnd里把LockWindow移除掉。
+
+public void removeLockWindow() {
+    ObjectAnimator fadeOut = ObjectAnimator.ofFloa...
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by Lizhe on February 24, 2017
+    </p>
+</div>
+<hr>
+
+<div class="post-preview">
+    <a href="http://lizhe.tech/2017/02/22/android-accessibility-disabled/index.html">
+        <h2 class="post-title">
+            为何Accessibility权限总被无故关闭
+        </h2>
+        
+        <h3 class="post-subtitle">
+            Why Accessibility Service Keeps Getting Disabled
+        </h3>
+        
+        <div class="post-content-preview">
+            一直以来，我就注意到给app开启Accessibility权限以后会莫名其妙消失。直到昨天，某PM同学发现forceStop之后Accessibility权限一定会关闭的规律。
+
+为何不是我发现这个规律呢？可能是因为懒。
+
+既然发现了规律，那么一切都有迹可循。
+
+一、原理
+
+1.1 ActivityManagerService
+在上一篇Magic Locker进程保活总结中，我们知道forc...
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by Lizhe on February 22, 2017
+    </p>
+</div>
+<hr>
+
+
+<!-- Pager -->
+
+<ul class="pager">
+    
+    
+    <li class="next">
+        <a href="http://lizhe.tech/page2">Older Posts &rarr;</a>
+    </li>
+    
+</ul>
+
+
+    		</div>
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-3 col-lg-offset-0
+                col-md-3 col-md-offset-0
+                col-sm-12
+                col-xs-12
+                sidebar-container
+            ">
+                <!-- Featured Tags -->
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="http://lizhe.tech/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                            
+                                <a href="http://lizhe.tech/tags/#Android" title="Android" rel="12">
+                                    Android
+                                </a>
+                            
+                        
+                            
+                        
+                            
+                                <a href="http://lizhe.tech/tags/#性能" title="性能" rel="2">
+                                    性能
+                                </a>
+                            
+                        
+                            
+                        
+                            
+                                <a href="http://lizhe.tech/tags/#Accessibility" title="Accessibility" rel="2">
+                                    Accessibility
+                                </a>
+                            
+                        
+                            
+                                <a href="http://lizhe.tech/tags/#锁屏" title="锁屏" rel="4">
+                                    锁屏
+                                </a>
+                            
+                        
+                            
+                        
+                            
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Short About -->
+                <section class="visible-md visible-lg">
+                    <hr><h5><a href="http://lizhe.tech/about/">ABOUT ME</a></h5>
+                    <div class="short-about">
+                        
+                            <img src="img/home-bg-new.jpg" />
+                        
+                        
+                            <p></p>
+                        
+                        <!-- SNS Link -->
+                        <ul class="list-inline">
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                        </ul>
+                    </div>
+                </section>
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+                    
+                        <li><a href="http://gank.io/">干货集中营</a></li>
+                    
+                        <li><a href="http://mida.re/">乱序</a></li>
+                    
+                </ul>
+                
+    		</div>
+        
+	</div>
+</div>
+
+
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    
+
+
+                    
+                    
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Lizhe Blog 2017
+                    |
+                    <!-- Theme by <a href="http://huangxuan.me">Hux</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=huxpro&repo=huxpro.github.io&type=star&count=true" >
+                    </iframe> -->
+                    Powered by <a href="https://jekyllrb.com/">Jekyll</a> with <a href="https://github.com/Kaijun/hexo-theme-huxblog">Hux</a> Theme
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="http://lizhe.tech/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="http://lizhe.tech/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="http://lizhe.tech/js/hux-blog.min.js "></script>
+
+<!-- Service Worker -->
+
+<script type="text/javascript">
+    if(navigator.serviceWorker){
+        // For security reasons, a service worker can only control the pages that are in the same directory level or below it. That's why we put sw.js at ROOT level.
+        navigator.serviceWorker
+            .register('/sw.js')
+            .then((registration) => {console.log('Service Worker Registered. ', registration)})
+            .catch((error) => {console.log('ServiceWorker registration failed: ', error)})
+    }
+</script>
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/ 
+     - https://github.com/jneen/rouge/wiki/list-of-supported-languages-and-lexers   
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async('http://lizhe.tech/js/jquery.tagcloud.js',function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-49627206-1';
+    var _gaDomain = 'huangxuan.me';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0" /> -->
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

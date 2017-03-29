@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="keywords"  content="">
+    <meta name="theme-color" content="#000000">
+    
+    <title>Android WebView修改加载页面的DOM结构 - 李哲的博客 | Lizhe Blog</title>
+
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="http://lizhe.tech/pwa/manifest.json">
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="http://lizhe.tech/img/favicon.ico">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="http://localhost:4000http://lizhe.tech/2016/12/06/android-webview-javascript/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="http://lizhe.tech/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="http://lizhe.tech/css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="http://lizhe.tech/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="http://lizhe.tech/">Lizhe Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="http://lizhe.tech/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="http://lizhe.tech/about/">About</a>
+                    </li>
+                    
+                    <li>
+                        <a href="http://lizhe.tech/tags/">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    var __HuxNav__ = {
+        close: function(){
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        },
+        open: function(){
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+
+    // Bind Event
+    $toggle.addEventListener('click', function(e){
+        if ($navbar.className.indexOf('in') > 0) {
+            __HuxNav__.close()
+        }else{
+            __HuxNav__.open()
+        }
+    })
+
+    /**
+     * Since Fastclick is used to delegate 'touchstart' globally
+     * to hack 300ms delay in iOS by performing a fake 'click',
+     * Using 'e.stopPropagation' to stop 'touchstart' event from 
+     * $toggle/$collapse will break global delegation.
+     * 
+     * Instead, we use a 'e.target' filter to prevent handler
+     * added to document close HuxNav.  
+     *
+     * Also, we use 'click' instead of 'touchstart' as compromise
+     */
+    document.addEventListener('click', function(e){
+        if(e.target == $toggle) return;
+        if(e.target.className == 'icon-bar') return;
+        __HuxNav__.close();
+    })
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="http://lizhe.tech/img/home-bg-new.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        position: relative;
+        background-image: url('http://lizhe.tech/img/home-bg-new.jpg')
+    }
+
+    
+    header.intro-header .header-mask{
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        background: rgba(0,0,0, 0.2);
+    }
+    
+</style>
+<header class="intro-header" >
+    <div class="header-mask"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="http://lizhe.tech/tags/#Android" title="Android">Android</a>
+                        
+                        <a class="tag" href="http://lizhe.tech/tags/#WebView" title="WebView">WebView</a>
+                        
+                    </div>
+                    <h1>Android WebView修改加载页面的DOM结构</h1>
+                    
+                    
+                    <h2 class="subheading">Modify DOM Structure in Android Webview</h2>
+                    
+                    <span class="meta">Posted by Lizhe on December 6, 2016</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				<p>最近工作中要加入一个简单的搜索功能，为用户提供便利。</p>
+
+<p>那有何难？直接用WebView加载一下百度和Google的搜索链接不就完了嘛…
+经过分析，百度的搜索url是<code class="highlighter-rouge">https://www.baidu.com/s?wd=keyword</code>, Google的搜索url是<code class="highlighter-rouge">https://www.google.com/search?q=keyword</code>。身在天朝，先拿百度做个试验吧~</p>
+
+<p>嗖嗖嗖代码出来了，最简单的WebView使用</p>
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">BAIDU_SEARCH_URL</span> <span class="o">=</span> <span class="s">"https://www.baidu.com/s?wd=webtest"</span><span class="o">;</span>
+<span class="kd">private</span> <span class="n">WebView</span> <span class="n">mWebView</span><span class="o">;</span>
+
+<span class="nd">@Override</span>
+<span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onCreate</span><span class="o">(</span><span class="n">Bundle</span> <span class="n">savedInstanceState</span><span class="o">)</span> <span class="o">{</span>    
+  <span class="kd">super</span><span class="o">.</span><span class="na">onCreate</span><span class="o">(</span><span class="n">savedInstanceState</span><span class="o">);</span>    
+  <span class="n">mWebView</span> <span class="o">=</span> <span class="k">new</span> <span class="n">WebView</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>    
+  <span class="n">setContentView</span><span class="o">(</span><span class="n">mWebView</span><span class="o">);</span>    
+
+  <span class="n">mWebView</span><span class="o">.</span><span class="na">loadUrl</span><span class="o">(</span><span class="n">BAIDU_SEARCH_URL</span><span class="o">);</span>
+<span class="o">}</span>
+</code></pre>
+</div>
+<p>结果上个图，恩，完美盗用了百度的成果
+<img src="http://upload-images.jianshu.io/upload_images/4075712-949493f4a62e52b1.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="加载百度搜索结果" /></p>
+
+<p>这时候，万恶的pm跳出来了，“咱们能把百度的脑袋砍了吗？”……OK，我懂你兄弟</p>
+
+<p><img src="http://upload-images.jianshu.io/upload_images/4075712-2b89673c8335c904.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="砍Baidu的脑袋" /></p>
+
+<p>虽然我也不知道这么做是否侵犯了百度的利益，但是既然pm提出来了，咱们也得给他实现不是。经过一番调查，最后确定了如下方案：</p>
+<ul>
+  <li>加载百度页面</li>
+  <li>加载完成的回调中，向页面注入JavaScript代码</li>
+  <li>JavaScript代码将配置的dom元素移除</li>
+</ul>
+
+<p>关键点就是怎么判断页面加载完成以及如何注入砍脑袋的JavaScript代码。</p>
+
+<p>WebView有个回调类叫WebChromeClient，它里面有个<code class="highlighter-rouge">onProgressChanged(WebView view, int newProgress) </code>的回调方法，每当dom树的加载进度变化时，就通知给我们的app。所以，我们可以近似地认为回调进度是100时就是页面加载完成的时刻。</p>
+
+<p>那怎么确定需要删除的dom元素id呢？我们可以到Chrome的开发者工具找到百度脑袋的dom元素id，如下图所示</p>
+
+<p><img src="http://upload-images.jianshu.io/upload_images/4075712-46ae6a9cc47ddb3b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="找百度脑袋的id" /></p>
+
+<p>好了，万事俱备，上代码</p>
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="c1">// 需要隐藏的dom元素id</span>
+<span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span><span class="o">[]</span> <span class="n">HIDE_DOM_IDS</span> <span class="o">=</span> <span class="o">{</span><span class="s">"page-hd"</span><span class="o">,</span> <span class="s">"page-tips"</span><span class="o">};</span>
+
+<span class="c1">// 定义WebChromeClient</span>
+<span class="kd">private</span> <span class="n">WebChromeClient</span> <span class="n">mSearchChromeClient</span> <span class="o">=</span> <span class="k">new</span> <span class="n">WebChromeClient</span><span class="o">()</span> <span class="o">{</span>  
+  <span class="nd">@Override</span>    
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onProgressChanged</span><span class="o">(</span><span class="n">WebView</span> <span class="n">view</span><span class="o">,</span> <span class="kt">int</span> <span class="n">newProgress</span><span class="o">)</span> <span class="o">{</span>  
+    <span class="n">Log</span><span class="o">.</span><span class="na">d</span><span class="o">(</span><span class="n">SEARCH_TAG</span><span class="o">,</span> <span class="s">"on page progress changed and progress is "</span> <span class="o">+</span> <span class="n">newProgress</span><span class="o">);</span>        
+    <span class="c1">// 进度是100就代表dom树加载完成了</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">newProgress</span> <span class="o">==</span> <span class="mi">100</span><span class="o">)</span> <span class="o">{</span>            
+      <span class="n">mWebView</span><span class="o">.</span><span class="na">loadUrl</span><span class="o">(</span><span class="n">getDomOperationStatements</span><span class="o">(</span><span class="n">HIDE_DOM_IDS</span><span class="o">));</span>        
+    <span class="o">}</span>    
+  <span class="o">}</span>
+<span class="o">};</span>
+
+<span class="n">mWebView</span><span class="o">.</span><span class="na">setWebChromeClient</span><span class="o">(</span><span class="n">mSearchChromeClient</span><span class="o">);</span>
+
+<span class="kd">public</span> <span class="kd">static</span> <span class="n">String</span> <span class="nf">getDomOperationStatements</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">hideDomIds</span><span class="o">)</span> <span class="o">{</span>   
+  <span class="n">StringBuilder</span> <span class="n">builder</span> <span class="o">=</span> <span class="k">new</span> <span class="n">StringBuilder</span><span class="o">();</span>    
+  <span class="c1">// add javascript prefix    </span>
+  <span class="n">builder</span><span class="o">.</span><span class="na">append</span><span class="o">(</span><span class="s">"javascript:(function() { "</span><span class="o">);</span>   
+  <span class="k">for</span> <span class="o">(</span><span class="n">String</span> <span class="n">domId</span> <span class="o">:</span> <span class="n">hideDomIds</span><span class="o">)</span> <span class="o">{</span>        
+    <span class="n">builder</span><span class="o">.</span><span class="na">append</span><span class="o">(</span><span class="s">"var item = document.getElementById('"</span><span class="o">).</span><span class="na">append</span><span class="o">(</span><span class="n">domId</span><span class="o">).</span><span class="na">append</span><span class="o">(</span><span class="s">"');"</span><span class="o">);</span>        
+    <span class="n">builder</span><span class="o">.</span><span class="na">append</span><span class="o">(</span><span class="s">"item.parentNode.removeChild(item);"</span><span class="o">);</span>    
+  <span class="o">}</span>    
+  <span class="c1">// add javascript suffix    </span>
+  <span class="n">builder</span><span class="o">.</span><span class="na">append</span><span class="o">(</span><span class="s">"})()"</span><span class="o">);</span>    
+  <span class="k">return</span> <span class="n">builder</span><span class="o">.</span><span class="na">toString</span><span class="o">();</span>
+<span class="o">}</span>
+</code></pre>
+</div>
+
+<p><img src="http://upload-images.jianshu.io/upload_images/4075712-90c6af1afdef6e8c.gif?imageMogr2/auto-orient/strip" alt="final.gif" /></p>
+
+<p>可以看到百度脑袋一闪而过，被切掉了。闪这一下倒是比较容易解决，可以通过先<code class="highlighter-rouge">mWebView.setVisibility(View.INVISIBLE)</code>，执行JavaScript代码1s后再<code class="highlighter-rouge">mWebView.setVisibility(View.VISIBLE)</code>解决，就不再赘述了。</p>
+
+<p>总结：虽然这个场景实用性不强，但可权且当做WebView操作页面元素的一个例子，提供一种自定义WebView的思路。</p>
+
+
+
+                <hr style="visibility: hidden;">
+
+                
+
+
+                <ul class="pager">
+                    
+                    
+                    <li class="next">
+                        <a href="http://lizhe.tech/2017/01/11/android-performance/index.html" data-toggle="tooltip" data-placement="top" title="Android流畅度优化">
+                        Next<br>
+                        <span>Android流畅度优化</span>
+                        </a>
+                    </li>
+                    
+                </ul>
+
+
+                
+
+                
+
+            </div>  
+
+    <!-- Side Catalog Container -->
+        
+            <div class="
+                col-lg-2 col-lg-offset-0
+                visible-lg-block
+                sidebar-container
+                catalog-container">
+                <div class="side-catalog">
+                    <hr class="hidden-sm hidden-xs">
+                    <h5>
+                        <a class="catalog-toggle" href="#">CATALOG</a>
+                    </h5>
+                    <ul class="catalog-body"></ul>
+                </div>
+            </div>
+        
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+        				
+                            
+                				<a href="/tags/#Android" title="Android" rel="12">
+                                    Android
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#性能" title="性能" rel="2">
+                                    性能
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Accessibility" title="Accessibility" rel="2">
+                                    Accessibility
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#锁屏" title="锁屏" rel="4">
+                                    锁屏
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+        			</div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+                    
+                        <li><a href="http://gank.io/">干货集中营</a></li>
+                    
+                        <li><a href="http://mida.re/">乱序</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("//cdnjs.cloudflare.com/ajax/libs/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    
+
+
+                    
+                    
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Lizhe Blog 2017
+                    |
+                    <!-- Theme by <a href="http://huangxuan.me">Hux</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=huxpro&repo=huxpro.github.io&type=star&count=true" >
+                    </iframe> -->
+                    Powered by <a href="https://jekyllrb.com/">Jekyll</a> with <a href="https://github.com/Kaijun/hexo-theme-huxblog">Hux</a> Theme
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="http://lizhe.tech/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="http://lizhe.tech/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="http://lizhe.tech/js/hux-blog.min.js "></script>
+
+<!-- Service Worker -->
+
+<script type="text/javascript">
+    if(navigator.serviceWorker){
+        // For security reasons, a service worker can only control the pages that are in the same directory level or below it. That's why we put sw.js at ROOT level.
+        navigator.serviceWorker
+            .register('/sw.js')
+            .then((registration) => {console.log('Service Worker Registered. ', registration)})
+            .catch((error) => {console.log('ServiceWorker registration failed: ', error)})
+    }
+</script>
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/ 
+     - https://github.com/jneen/rouge/wiki/list-of-supported-languages-and-lexers   
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async('http://lizhe.tech/js/jquery.tagcloud.js',function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-49627206-1';
+    var _gaDomain = 'huangxuan.me';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+
+<!-- Side Catalog -->
+
+<script type="text/javascript">
+    function generateCatalog (selector) {
+        var P = $('div.post-container'),a,n,t,l,i,c;
+        a = P.find('h1,h2,h3,h4,h5,h6');
+        a.each(function () {
+            n = $(this).prop('tagName').toLowerCase();
+            i = "#"+$(this).prop('id');
+            t = $(this).text();
+            c = $('<a href="'+i+'" rel="nofollow">'+t+'</a>');
+            l = $('<li class="'+n+'_nav"></li>').append(c);
+            $(selector).append(l);
+        });
+        return true;    
+    }
+
+    generateCatalog(".catalog-body");
+
+    // toggle side catalog
+    $(".catalog-toggle").click((function(e){
+        e.preventDefault();
+        $('.side-catalog').toggleClass("fold")
+    }))
+
+    /*
+     * Doc: https://github.com/davist11/jQuery-One-Page-Nav
+     * Fork by Hux to support padding
+     */
+    async("http://lizhe.tech/js/jquery.nav.js", function () {
+        $('.catalog-body').onePageNav({
+            currentClass: "active",
+            changeHash: !1,
+            easing: "swing",
+            filter: "",
+            scrollSpeed: 700,
+            scrollOffset: 0,
+            scrollThreshold: .2,
+            begin: null,
+            end: null,
+            scrollChange: null,
+            padding: 80
+        });
+    });
+</script>
+
+
+
+
+
+<!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0" /> -->
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

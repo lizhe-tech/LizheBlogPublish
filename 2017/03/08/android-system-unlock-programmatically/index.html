@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="keywords"  content="">
+    <meta name="theme-color" content="#000000">
+    
+    <title>Android强制显示系统解锁页 - 李哲的博客 | Lizhe Blog</title>
+
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="http://lizhe.tech/pwa/manifest.json">
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="http://lizhe.tech/img/favicon.ico">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="http://localhost:4000http://lizhe.tech/2017/03/08/android-system-unlock-programmatically/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="http://lizhe.tech/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="http://lizhe.tech/css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="http://lizhe.tech/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="http://lizhe.tech/">Lizhe Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="http://lizhe.tech/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="http://lizhe.tech/about/">About</a>
+                    </li>
+                    
+                    <li>
+                        <a href="http://lizhe.tech/tags/">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    var __HuxNav__ = {
+        close: function(){
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        },
+        open: function(){
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+
+    // Bind Event
+    $toggle.addEventListener('click', function(e){
+        if ($navbar.className.indexOf('in') > 0) {
+            __HuxNav__.close()
+        }else{
+            __HuxNav__.open()
+        }
+    })
+
+    /**
+     * Since Fastclick is used to delegate 'touchstart' globally
+     * to hack 300ms delay in iOS by performing a fake 'click',
+     * Using 'e.stopPropagation' to stop 'touchstart' event from 
+     * $toggle/$collapse will break global delegation.
+     * 
+     * Instead, we use a 'e.target' filter to prevent handler
+     * added to document close HuxNav.  
+     *
+     * Also, we use 'click' instead of 'touchstart' as compromise
+     */
+    document.addEventListener('click', function(e){
+        if(e.target == $toggle) return;
+        if(e.target.className == 'icon-bar') return;
+        __HuxNav__.close();
+    })
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="http://lizhe.tech/img/home-bg-new.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        position: relative;
+        background-image: url('http://lizhe.tech/img/home-bg-new.jpg')
+    }
+
+    
+    header.intro-header .header-mask{
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        background: rgba(0,0,0, 0.2);
+    }
+    
+</style>
+<header class="intro-header" >
+    <div class="header-mask"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="http://lizhe.tech/tags/#Android" title="Android">Android</a>
+                        
+                        <a class="tag" href="http://lizhe.tech/tags/#锁屏" title="锁屏">锁屏</a>
+                        
+                    </div>
+                    <h1>Android强制显示系统解锁页</h1>
+                    
+                    
+                    <h2 class="subheading">Force Show Unlock View Programmatically When System Locker's Showing</h2>
+                    
+                    <span class="meta">Posted by Lizhe on March 8, 2017</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				<p>近期做充电锁屏需求，在研究竞品的过程中，发现360Security能够自动调起系统的解锁页，感觉很神奇。</p>
+
+<video width="40%" style="margin:0 auto;display: block;" src="../../../../img/in-post/post-android-system-unlock-programmatically/360security.mp4" controls="controls" autoplay="autoplay"></video>
+
+<p>首先想到的是系统提供了解锁意图的广播或者Intent，接到后会调起解锁页，但是经过调研后并没有找到。所以只能逆向一下360Security，看它怎么搞出来的。</p>
+
+<h2 id="1-下载apk">1. 下载apk</h2>
+<p>这里记一个很方便能够搜索下载apk的网站：<a href="http://www.coolapk.com/">http://www.coolapk.com/(酷安网)</a>。</p>
+
+<p>搜索360Security，下载得到com.qihoo.security_2266.apk。</p>
+
+<h2 id="2-使用apk-tool反编译">2. 使用apk-tool反编译</h2>
+
+<p>反编译得到资源和smali代码等，备用。目录结构如下，它也是两个dex包的。</p>
+
+<div class="language-text highlighter-rouge"><pre class="highlight"><code>com.qihoo.security_2266-O
+├── AndroidManifest.xml
+├── apktool.yml
+├── assets
+├── build
+├── lib
+├── original
+├── res
+├── smali
+├── smali_classes2
+└── unknown
+</code></pre>
+</div>
+
+<h2 id="3-使用jadx-gui导出gradle项目">3. 使用jadx-gui导出gradle项目</h2>
+
+<p>虽然jadx-gui已经很好用了，但在查找和跳转上还是不够方便，好在它提供了导出gradle项目的功能。导出gradle项目以后，我们用AndroidStudio导入项目，AndroidStudio会自动创建索引，方便我们阅读代码。</p>
+
+<p><img src="../../../../img/in-post/post-android-system-unlock-programmatically/360reverse.png" alt="" /></p>
+
+<p>能够看到360Security除了使用一堆广告库以外，还用了Volley、json-path、loopj、Picasso、EventBus、ProtocalBuffer开源库，没有太多功能重复和混乱的地方，算是很优质的结构。</p>
+
+<h2 id="4-找到隐藏锁屏的逻辑">4. 找到隐藏锁屏的逻辑</h2>
+
+<p>首先我们要找到锁屏的Activity。在锁屏时使用adb shell dumpsys activity activities,得到以下信息：</p>
+<div class="language-text highlighter-rouge"><pre class="highlight"><code>  mFocusedActivity: ActivityRecord{b97dda5 u0 com.apusapps.launcher/.launcher.ApusLauncherActivity t2932}
+  mFocusedStack=ActivityStack{2a9b3162 stackId=0, 1 tasks} mLastFocusedStack=ActivityStack{2491ee01 stackId=1, 18 tasks}
+  mSleepTimeout=false
+  mCurTaskId=2969
+  mUserStackInFront={}
+  mActivityContainers={0=ActivtyContainer{0}A, 1=ActivtyContainer{1}A}
+</code></pre>
+</div>
+<p>当前Activity竟然是ApusLauncher，那就得出360Security是使用悬浮窗做锁屏的结论，那么肯定有一个Service来管理锁屏的addView和removeView。</p>
+
+<p>找到这个Service：<code class="highlighter-rouge">com.chicken.lockscreen.floatview.LockScreenFloatViewService</code>。</p>
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">LockScreenFloatViewService</span> <span class="kd">extends</span> <span class="n">Service</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="n">Handler</span> <span class="n">a</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="n">WindowManager</span> <span class="n">b</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="n">LockScreenRootView</span> <span class="n">c</span><span class="o">;</span>
+
+    <span class="o">*********</span><span class="err">省略</span><span class="o">********</span>
+
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">c</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(!</span><span class="n">f</span><span class="o">.</span><span class="na">a</span><span class="o">(</span><span class="k">this</span><span class="o">))</span> <span class="o">{</span>
+            <span class="n">DismissActivity</span><span class="o">.</span><span class="na">a</span><span class="o">((</span><span class="n">Context</span><span class="o">)</span> <span class="k">this</span><span class="o">);</span>
+        <span class="o">}</span>
+        <span class="n">c</span><span class="o">.</span><span class="na">p</span><span class="o">().</span><span class="na">a</span><span class="o">(</span><span class="n">LockScreenTypeEnum</span><span class="o">.</span><span class="na">NONE</span><span class="o">);</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">d</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="n">SystemStatusObserver</span><span class="o">.</span><span class="na">getInstance</span><span class="o">.</span><span class="na">removeSystemStatusChangeListener</span><span class="o">(</span><span class="n">LockScreenViewManager</span><span class="o">.</span><span class="na">getInstance</span><span class="o">,</span> <span class="k">this</span><span class="o">.</span><span class="na">e</span><span class="o">);</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">LockScreenViewManager</span><span class="o">.</span><span class="na">getInstance</span><span class="o">.</span><span class="na">onScreenLockViewDestory</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+        <span class="o">}</span>
+        <span class="k">if</span> <span class="o">(</span><span class="k">this</span><span class="o">.</span><span class="na">c</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">this</span><span class="o">.</span><span class="na">c</span><span class="o">.</span><span class="na">a</span><span class="o">();</span>
+        <span class="o">}</span>
+        <span class="k">try</span> <span class="o">{</span>
+        	<span class="c1">// 隐藏锁屏</span>
+            <span class="k">this</span><span class="o">.</span><span class="na">b</span><span class="o">.</span><span class="na">removeView</span><span class="o">(</span><span class="k">this</span><span class="o">.</span><span class="na">c</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">Exception</span> <span class="n">e2</span><span class="o">)</span> <span class="o">{</span>
+        <span class="o">}</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">c</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="n">JustGo</span><span class="o">.</span><span class="na">a</span><span class="o">((</span><span class="n">Context</span><span class="o">)</span> <span class="k">this</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="o">*********</span><span class="err">省略</span><span class="o">********</span>
+<span class="o">}</span>
+</code></pre>
+</div>
+<p>很容易理解，这里定义了一个WindowManager b，一个LockScreenRootView c，那么显示锁屏就是b.addView(c, layoutParams),隐藏锁屏是b.removeView(c)，这在下面的方法c()里得到了体现。</p>
+
+<p>容易看出，紧接着的<code class="highlighter-rouge">JustGo.a((Context) this);</code>就有很大可能是关键点。</p>
+
+<h2 id="5-修改smali并重建apk">5. 修改smali并重建apk</h2>
+
+<p>JustGo.a()即通过Intent打开JustGo这个Activity。</p>
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">a</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">)</span> <span class="o">{</span>
+    <span class="kt">boolean</span> <span class="n">a</span> <span class="o">=</span> <span class="n">a</span><span class="o">(</span><span class="n">context</span><span class="o">,</span> <span class="kc">false</span><span class="o">);</span>
+    <span class="n">Log</span><span class="o">.</span><span class="na">e</span><span class="o">(</span><span class="s">"JustGo"</span><span class="o">,</span> <span class="s">"=======finish======isSecurity-----"</span> <span class="o">+</span> <span class="n">a</span><span class="o">);</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">a</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">Intent</span> <span class="n">intent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="n">context</span><span class="o">,</span> <span class="n">JustGo</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+        <span class="n">intent</span><span class="o">.</span><span class="na">addFlags</span><span class="o">(</span><span class="mi">268435456</span><span class="o">);</span>
+        <span class="n">context</span><span class="o">.</span><span class="na">startActivity</span><span class="o">(</span><span class="n">intent</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre>
+</div>
+<p>由于JustGo的代码比较难读，为了节省时间，可以去smali里注释掉<code class="highlighter-rouge">context.startActivity(intent)</code>，来验证JustGo是否为关键。</p>
+<pre><code class="language-smali">.line 106
+new-instance v0, Landroid/content/Intent;
+
+const-class v1, Lcom/chicken/lockscreen/activity/JustGo;
+
+invoke-direct {v0, p0, v1}, Landroid/content/Intent;-&gt;&lt;init&gt;(Landroid/content/Context;Ljava/lang/Class;)V
+
+.line 107
+const/high16 v1, 0x10000000
+
+invoke-virtual {v0, v1}, Landroid/content/Intent;-&gt;addFlags(I)Landroid/content/Intent;
+
+.line 108
+invoke-virtual {p0, v0}, Landroid/content/Context;-&gt;startActivity(Landroid/content/Intent;)V
+</code></pre>
+<p>上面的smali是启动Activity的过程，只需要把最后一行删除，使用apk-tool重新打包签名。跑起来以后，发现调起解锁页的功能消失了，那么就肯定是JustGo这个Activity起的作用。</p>
+
+<video width="40%" style="margin:0 auto;display: block;" src="../../../../img/in-post/post-android-system-unlock-programmatically/360security-r-s.mp4" controls="controls" autoplay="autoplay"></video>
+
+<h2 id="6-整理代码">6. 整理代码</h2>
+
+<p>接下来需要整理JustGo的代码，看看到底为啥它能自动调起系统锁屏页。把JustGo这个无意义的名字改成了DismissKeyguardActivity，整理后代码如下：</p>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">android.app.Activity</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">android.content.Context</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">android.content.Intent</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">android.os.Bundle</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">android.os.Handler</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">android.view.ViewTreeObserver</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">android</span><span class="o">.</span><span class="na">view</span><span class="o">.</span><span class="na">Window</span><span class="o">.</span><span class="na">FEATURE_NO_TITLE</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">android</span><span class="o">.</span><span class="na">view</span><span class="o">.</span><span class="na">WindowManager</span><span class="o">.</span><span class="na">LayoutParams</span><span class="o">.</span><span class="na">FLAG_DISMISS_KEYGUARD</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">android</span><span class="o">.</span><span class="na">view</span><span class="o">.</span><span class="na">WindowManager</span><span class="o">.</span><span class="na">LayoutParams</span><span class="o">.</span><span class="na">FLAG_FULLSCREEN</span><span class="o">;</span>
+
+<span class="cm">/**
+ * We want show unlock pattern view automatically, so we create this activity with
+ * FLAG_DISMISS_KEYGUARD.
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">DismissKeyguradActivity</span> <span class="kd">extends</span> <span class="n">Activity</span> <span class="o">{</span>
+
+    <span class="kd">private</span> <span class="n">Handler</span> <span class="n">handler</span><span class="o">=</span> <span class="k">new</span> <span class="n">Handler</span><span class="o">();</span>
+    <span class="kd">private</span> <span class="n">Runnable</span> <span class="n">runnable</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Runnable</span><span class="o">()</span> <span class="o">{</span>
+        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+            <span class="n">finish</span><span class="o">();</span>
+        <span class="o">}</span>
+    <span class="o">};</span>
+    <span class="kd">private</span> <span class="n">ViewTreeObserver</span><span class="o">.</span><span class="na">OnPreDrawListener</span> <span class="n">onPreDrawListener</span><span class="o">;</span>
+
+    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onCreate</span><span class="o">(</span><span class="n">Bundle</span> <span class="n">bundle</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kd">super</span><span class="o">.</span><span class="na">onCreate</span><span class="o">(</span><span class="n">bundle</span><span class="o">);</span>
+
+        <span class="n">requestWindowFeature</span><span class="o">(</span><span class="n">FEATURE_NO_TITLE</span><span class="o">);</span>
+
+        <span class="n">getWindow</span><span class="o">().</span><span class="na">addFlags</span><span class="o">(</span><span class="n">FLAG_DISMISS_KEYGUARD</span> <span class="o">|</span> <span class="n">FLAG_FULLSCREEN</span><span class="o">);</span>
+
+        <span class="n">onPreDrawListener</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ViewTreeObserver</span><span class="o">.</span><span class="na">OnPreDrawListener</span><span class="o">()</span> <span class="o">{</span>
+            <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">onPreDraw</span><span class="o">()</span> <span class="o">{</span>
+                <span class="n">getWindow</span><span class="o">().</span><span class="na">getDecorView</span><span class="o">().</span><span class="na">getViewTreeObserver</span><span class="o">().</span><span class="na">removeOnPreDrawListener</span><span class="o">(</span><span class="n">onPreDrawListener</span><span class="o">);</span>
+                <span class="n">handler</span><span class="o">.</span><span class="na">postDelayed</span><span class="o">(</span><span class="n">runnable</span><span class="o">,</span> <span class="n">isKeyguardSecured</span><span class="o">(</span><span class="n">DismissKeyguradActivity</span><span class="o">.</span><span class="na">this</span><span class="o">,</span> <span class="kc">false</span><span class="o">)</span> <span class="o">?</span> <span class="mi">1000</span> <span class="o">:</span> <span class="mi">0</span><span class="o">);</span>
+                <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
+            <span class="o">}</span>
+        <span class="o">};</span>
+        <span class="n">getWindow</span><span class="o">().</span><span class="na">getDecorView</span><span class="o">().</span><span class="na">getViewTreeObserver</span><span class="o">().</span><span class="na">addOnPreDrawListener</span><span class="o">(</span><span class="n">onPreDrawListener</span><span class="o">);</span>
+    <span class="o">}</span>
+
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">startSelfIfKeyguardSecured</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">isKeyguardSecured</span><span class="o">(</span><span class="n">context</span><span class="o">,</span> <span class="kc">false</span><span class="o">))</span> <span class="o">{</span>
+            <span class="n">Intent</span> <span class="n">intent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="n">context</span><span class="o">,</span> <span class="n">DismissKeyguradActivity</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+            <span class="n">intent</span><span class="o">.</span><span class="na">addFlags</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">FLAG_ACTIVITY_NEW_TASK</span><span class="o">);</span>
+            <span class="n">context</span><span class="o">.</span><span class="na">startActivity</span><span class="o">(</span><span class="n">intent</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre>
+</div>
+<p>整理后发现，android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD这个flag起了重要作用。</p>
+
+<h2 id="7-flag_dismiss_keyguard">7. FLAG_DISMISS_KEYGUARD</h2>
+
+<p>我们知道，FLAG_DISMISS_KEYGUARD会使普通系统锁屏消失，这一点从JavaDoc注释里可以了解到。但是360Security利用了它更不为人知的一面：当系统为安全锁屏（存在密码）时，带有FLAG_DISMISS_KEYGUARD标记的Activity启动会触发解锁页的调起。</p>
+
+<p>至于FLAG_DISMISS_KEYGUARD触发解锁页调起的流程，将单独开一篇文章，从源码层面分析。</p>
+
+
+                <hr style="visibility: hidden;">
+
+                
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="http://lizhe.tech/2017/03/06/android-easter-eggs/index.html" data-toggle="tooltip" data-placement="top" title="Android源码中的那些彩蛋">
+                        Previous<br>
+                        <span>Android源码中的那些彩蛋</span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="http://lizhe.tech/2017/03/09/android-charging-screen-blinks/index.html" data-toggle="tooltip" data-placement="top" title="Android自定义锁屏和系统锁屏冲突并闪烁">
+                        Next<br>
+                        <span>Android自定义锁屏和系统锁屏冲突并闪烁</span>
+                        </a>
+                    </li>
+                    
+                </ul>
+
+
+                
+
+                
+
+            </div>  
+
+    <!-- Side Catalog Container -->
+        
+            <div class="
+                col-lg-2 col-lg-offset-0
+                visible-lg-block
+                sidebar-container
+                catalog-container">
+                <div class="side-catalog">
+                    <hr class="hidden-sm hidden-xs">
+                    <h5>
+                        <a class="catalog-toggle" href="#">CATALOG</a>
+                    </h5>
+                    <ul class="catalog-body"></ul>
+                </div>
+            </div>
+        
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+        				
+                            
+                				<a href="/tags/#Android" title="Android" rel="12">
+                                    Android
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#性能" title="性能" rel="2">
+                                    性能
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Accessibility" title="Accessibility" rel="2">
+                                    Accessibility
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#锁屏" title="锁屏" rel="4">
+                                    锁屏
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+        			</div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+                    
+                        <li><a href="http://gank.io/">干货集中营</a></li>
+                    
+                        <li><a href="http://mida.re/">乱序</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("//cdnjs.cloudflare.com/ajax/libs/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    
+
+
+                    
+                    
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Lizhe Blog 2017
+                    |
+                    <!-- Theme by <a href="http://huangxuan.me">Hux</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=huxpro&repo=huxpro.github.io&type=star&count=true" >
+                    </iframe> -->
+                    Powered by <a href="https://jekyllrb.com/">Jekyll</a> with <a href="https://github.com/Kaijun/hexo-theme-huxblog">Hux</a> Theme
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="http://lizhe.tech/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="http://lizhe.tech/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="http://lizhe.tech/js/hux-blog.min.js "></script>
+
+<!-- Service Worker -->
+
+<script type="text/javascript">
+    if(navigator.serviceWorker){
+        // For security reasons, a service worker can only control the pages that are in the same directory level or below it. That's why we put sw.js at ROOT level.
+        navigator.serviceWorker
+            .register('/sw.js')
+            .then((registration) => {console.log('Service Worker Registered. ', registration)})
+            .catch((error) => {console.log('ServiceWorker registration failed: ', error)})
+    }
+</script>
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/ 
+     - https://github.com/jneen/rouge/wiki/list-of-supported-languages-and-lexers   
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async('http://lizhe.tech/js/jquery.tagcloud.js',function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-49627206-1';
+    var _gaDomain = 'huangxuan.me';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+
+<!-- Side Catalog -->
+
+<script type="text/javascript">
+    function generateCatalog (selector) {
+        var P = $('div.post-container'),a,n,t,l,i,c;
+        a = P.find('h1,h2,h3,h4,h5,h6');
+        a.each(function () {
+            n = $(this).prop('tagName').toLowerCase();
+            i = "#"+$(this).prop('id');
+            t = $(this).text();
+            c = $('<a href="'+i+'" rel="nofollow">'+t+'</a>');
+            l = $('<li class="'+n+'_nav"></li>').append(c);
+            $(selector).append(l);
+        });
+        return true;    
+    }
+
+    generateCatalog(".catalog-body");
+
+    // toggle side catalog
+    $(".catalog-toggle").click((function(e){
+        e.preventDefault();
+        $('.side-catalog').toggleClass("fold")
+    }))
+
+    /*
+     * Doc: https://github.com/davist11/jQuery-One-Page-Nav
+     * Fork by Hux to support padding
+     */
+    async("http://lizhe.tech/js/jquery.nav.js", function () {
+        $('.catalog-body').onePageNav({
+            currentClass: "active",
+            changeHash: !1,
+            easing: "swing",
+            filter: "",
+            scrollSpeed: 700,
+            scrollOffset: 0,
+            scrollThreshold: .2,
+            begin: null,
+            end: null,
+            scrollChange: null,
+            padding: 80
+        });
+    });
+</script>
+
+
+
+
+
+<!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0" /> -->
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="keywords"  content="">
+    <meta name="theme-color" content="#000000">
+    
+    <title>Android无障碍功能介绍 - 李哲的博客 | Lizhe Blog</title>
+
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="http://lizhe.tech/pwa/manifest.json">
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="http://lizhe.tech/img/favicon.ico">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="http://localhost:4000http://lizhe.tech/2017/02/20/android-accessibility/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="http://lizhe.tech/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="http://lizhe.tech/css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="http://lizhe.tech/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="http://lizhe.tech/">Lizhe Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="http://lizhe.tech/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="http://lizhe.tech/about/">About</a>
+                    </li>
+                    
+                    <li>
+                        <a href="http://lizhe.tech/tags/">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    var __HuxNav__ = {
+        close: function(){
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        },
+        open: function(){
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+
+    // Bind Event
+    $toggle.addEventListener('click', function(e){
+        if ($navbar.className.indexOf('in') > 0) {
+            __HuxNav__.close()
+        }else{
+            __HuxNav__.open()
+        }
+    })
+
+    /**
+     * Since Fastclick is used to delegate 'touchstart' globally
+     * to hack 300ms delay in iOS by performing a fake 'click',
+     * Using 'e.stopPropagation' to stop 'touchstart' event from 
+     * $toggle/$collapse will break global delegation.
+     * 
+     * Instead, we use a 'e.target' filter to prevent handler
+     * added to document close HuxNav.  
+     *
+     * Also, we use 'click' instead of 'touchstart' as compromise
+     */
+    document.addEventListener('click', function(e){
+        if(e.target == $toggle) return;
+        if(e.target.className == 'icon-bar') return;
+        __HuxNav__.close();
+    })
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="http://lizhe.tech/img/home-bg-new.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        position: relative;
+        background-image: url('http://lizhe.tech/img/home-bg-new.jpg')
+    }
+
+    
+    header.intro-header .header-mask{
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        background: rgba(0,0,0, 0.2);
+    }
+    
+</style>
+<header class="intro-header" >
+    <div class="header-mask"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="http://lizhe.tech/tags/#Android" title="Android">Android</a>
+                        
+                        <a class="tag" href="http://lizhe.tech/tags/#Accessibility" title="Accessibility">Accessibility</a>
+                        
+                    </div>
+                    <h1>Android无障碍功能介绍</h1>
+                    
+                    
+                    <h2 class="subheading">Android Accessibility Service Introduction</h2>
+                    
+                    <span class="meta">Posted by Lizhe on February 20, 2017</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				<blockquote>
+  <p>Android is for Everyone,  and Everyone has the access to Everything.</p>
+</blockquote>
+
+<p>Google在API 4加入无障碍设计（Accessibility）的初衷是为了服务残疾人，或者无法正常和设备交互的人，比如正在开车的司机、带小孩的母亲、视力弱化的老人等。</p>
+
+<p>Google API对Accessibility服务的描述为：</p>
+<ul>
+  <li>Accessibility Service应该<strong>只被</strong>用来辅助残障用户使用Android设备和应用。</li>
+  <li>它运行在后台，能够在AccessibilityEvent发生时接到系统的异步回调。</li>
+  <li>这些事件代表着用户界面的状态变化，例如，焦点变更、按钮点击等。</li>
+  <li>Accessibility Service也可以通过额外的配置，获取遍历界面上所有内容的能力。</li>
+</ul>
+
+<h2 id="一accessibility基础知识">一、Accessibility基础知识</h2>
+
+<h3 id="11-声明">1.1 声明</h3>
+
+<div class="language-xml highlighter-rouge"><pre class="highlight"><code><span class="nt">&lt;service</span> <span class="na">android:name=</span><span class="s">".MyAccessibilityService"</span>
+         <span class="na">android:permission=</span><span class="s">"android.permission.BIND_ACCESSIBILITY_SERVICE"</span><span class="nt">&gt;</span>
+     <span class="nt">&lt;intent-filter&gt;</span>
+         <span class="nt">&lt;action</span> <span class="na">android:name=</span><span class="s">"android.accessibilityservice.AccessibilityService"</span> <span class="nt">/&gt;</span>
+     <span class="nt">&lt;/intent-filter&gt;</span>
+     . . .
+ <span class="nt">&lt;/service&gt;</span>
+</code></pre>
+</div>
+
+<ul>
+  <li>声明android.permission.BIND_ACCESSIBILITY_SERVICE权限</li>
+  <li>声明Service可以处理android.accessibilityservice.AccessibilityService这个Intent</li>
+</ul>
+
+<h3 id="12-配置">1.2 配置</h3>
+
+<h4 id="121-两种配置方式">1.2.1 两种配置方式</h4>
+
+<p>A、在Manifest里声明meta-data，指定一个xml文件。</p>
+<div class="language-xml highlighter-rouge"><pre class="highlight"><code><span class="nt">&lt;service</span> <span class="na">android:name=</span><span class="s">".MyAccessibilityService"</span><span class="nt">&gt;</span>
+	<span class="nt">&lt;intent-filter&gt;</span>
+		<span class="nt">&lt;action</span> <span class="na">android:name=</span><span class="s">"android.accessibilityservice.AccessibilityService"</span> <span class="nt">/&gt;</span>
+	<span class="nt">&lt;/intent-filter&gt;</span>
+	<span class="nt">&lt;meta-data</span> <span class="na">android:name=</span><span class="s">"android.accessibilityservice"</span> <span class="na">android:resource=</span><span class="s">"@xml/accessibilityservice"</span> <span class="nt">/&gt;</span>
+ <span class="nt">&lt;/service&gt;</span>
+</code></pre>
+</div>
+
+<p>xml/accessibilityservice.xml</p>
+<div class="language-xml highlighter-rouge"><pre class="highlight"><code> <span class="nt">&lt;accessibility-service</span>
+     <span class="na">android:accessibilityEventTypes=</span><span class="s">"typeViewClicked|typeWindowStateChanged"</span>
+     <span class="na">android:packageNames=</span><span class="s">"foo.bar, foo.baz"</span>
+     <span class="na">android:notificationTimeout=</span><span class="s">"100"</span>
+     <span class="na">android:accessibilityFlags=</span><span class="s">"flagDefault"</span>
+     <span class="na">android:canRetrieveWindowContent=</span><span class="s">"true"</span>
+     <span class="na">android:description=</span><span class="s">"@string/boost_plus_accessibility_service_description"</span>
+     <span class="err">.</span> <span class="err">.</span> <span class="err">.</span>
+ <span class="nt">/&gt;</span>
+</code></pre>
+</div>
+
+<p>B、在代码里配置</p>
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kt">void</span> <span class="nf">setServiceInfo</span> <span class="o">(</span><span class="n">AccessibilityServiceInfo</span> <span class="n">info</span><span class="o">)</span>
+</code></pre>
+</div>
+
+<h4 id="122-配置项说明">1.2.2 配置项说明</h4>
+<ul>
+  <li>accessibilityEventTypes 代表希望接收的事件类型</li>
+  <li>canRetrieveWindowContent 是否能获取窗口能容</li>
+  <li>canRequestFilterKeyEvents 是否接收按键消息</li>
+  <li>notificationTime 相邻两个AccessibilityEvent接收的最小时间间隔</li>
+  <li>description 权限描述文字</li>
+  <li>packageNames 接收哪些应用的AccessibilityEvent</li>
+</ul>
+
+<h3 id="13-使用">1.3 使用</h3>
+
+<h4 id="131-事件监听异步回调">1.3.1 事件监听(异步回调)</h4>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kt">void</span> <span class="nf">onAccessibilityEvent</span> <span class="o">(</span><span class="n">AccessibilityEvent</span> <span class="n">event</span><span class="o">)</span>
+</code></pre>
+</div>
+
+<ul>
+  <li><code class="highlighter-rouge">TYPE_VIEW_CLICKED</code>  View点击事件</li>
+  <li><code class="highlighter-rouge">TYPE_VIEW_LONG_CLICKED</code>  View长按事件</li>
+  <li><code class="highlighter-rouge">TYPE_VIEW_TEXT_CHANGED</code> EditText内容变化事件</li>
+  <li><code class="highlighter-rouge">TYPE_VIEW_SCROLLED</code> 界面滑动结束</li>
+  <li><code class="highlighter-rouge">TYPE_WINDOW_STATE_CHANGED</code> 代表任何界面的跳转，如Activity、Dialog、PopupWindow等</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kt">boolean</span> <span class="nf">onKeyEvent</span> <span class="o">(</span><span class="n">KeyEvent</span> <span class="n">event</span><span class="o">)</span>
+</code></pre>
+</div>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kt">boolean</span> <span class="nf">onGesture</span> <span class="o">(</span><span class="kt">int</span> <span class="n">gestureId</span><span class="o">)</span>
+</code></pre>
+</div>
+
+<h4 id="132-动作模拟">1.3.2 动作模拟</h4>
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="c1">// 全局性动作</span>
+<span class="kt">boolean</span> <span class="nf">performGlobalAction</span> <span class="o">(</span><span class="kt">int</span> <span class="n">action</span><span class="o">)</span>
+</code></pre>
+</div>
+
+<ul>
+  <li><code class="highlighter-rouge">GLOBAL_ACTION_BACK</code> Back键</li>
+  <li><code class="highlighter-rouge">GLOBAL_ACTION_HOME</code> Home键</li>
+  <li><code class="highlighter-rouge">GLOBAL_ACTION_RECENTS</code> Recent键</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="c1">// 对某个View做动作</span>
+<span class="nl">AccessibilityNodeInfo:</span> <span class="kt">boolean</span> <span class="nf">performAction</span> <span class="o">(</span><span class="kt">int</span> <span class="n">action</span><span class="o">)</span>
+</code></pre>
+</div>
+
+<ul>
+  <li><code class="highlighter-rouge">ACTION_CLICK</code> 点击动作</li>
+  <li><code class="highlighter-rouge">ACTION_LONG_CLICK</code> 长按动作</li>
+  <li><code class="highlighter-rouge">ACTION_SCROLL_UP</code> 向上滑动</li>
+  <li><code class="highlighter-rouge">ACTION_SCROLL_DOWN</code> 向下滑动</li>
+  <li><code class="highlighter-rouge">ACTION_SET_TEXT</code> 设置文字内容</li>
+</ul>
+
+<h4 id="133-accessibilitynodeinfo">1.3.3 AccessibilityNodeInfo</h4>
+<p>View Hierarchy和AccessibilityNodeInfo树状结构。</p>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="n">AccessibilityNodeInfo</span> <span class="n">AccessibilityService</span><span class="o">.</span><span class="na">getRootInActiveWindow</span><span class="o">()</span>
+</code></pre>
+</div>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">AccessibilityNodeInfo</span> <span class="kd">implements</span> <span class="n">Parcelable</span> <span class="o">{</span>
+    <span class="c1">// find children</span>
+    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">getChildCount</span> <span class="o">()</span>
+    <span class="kd">public</span> <span class="n">AccessibilityNodeInfo</span> <span class="nf">getChild</span> <span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">)</span>
+
+    <span class="c1">// find children by filters</span>
+    <span class="kd">public</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">AccessibilityNodeInfo</span><span class="o">&gt;</span> <span class="nf">findAccessibilityNodeInfosByText</span> <span class="o">(</span><span class="n">String</span> <span class="n">text</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">AccessibilityNodeInfo</span><span class="o">&gt;</span> <span class="nf">findAccessibilityNodeInfosByViewId</span> <span class="o">(</span><span class="n">String</span> <span class="n">viewId</span><span class="o">)</span>     
+
+    <span class="c1">// get view display information</span>
+    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">getWindowId</span> <span class="o">()</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">getBoundsInScreen</span> <span class="o">(</span><span class="n">Rect</span> <span class="n">outBounds</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="n">CharSequence</span> <span class="nf">getText</span> <span class="o">()</span>
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">isChecked</span> <span class="o">()</span>
+
+    <span class="c1">// get view class information</span>
+    <span class="kd">public</span> <span class="n">CharSequence</span> <span class="nf">getClassName</span> <span class="o">()</span>
+    <span class="kd">public</span> <span class="n">CharSequence</span> <span class="nf">getPackageName</span> <span class="o">()</span>
+
+    <span class="c1">// do something</span>
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">performAction</span> <span class="o">(</span><span class="kt">int</span> <span class="n">action</span><span class="o">)</span>
+<span class="o">}</span>
+</code></pre>
+</div>
+
+<h2 id="二单例化">二、单例化</h2>
+<blockquote>
+  <p>Accessibility权限的赋予是以Service为单元，而不是以Application为单元。</p>
+</blockquote>
+
+<p><strong>Ex.</strong> 一个应用里需要用Accessibility Service做两件事</p>
+<ul>
+  <li>清理内存ForceStop</li>
+  <li>监听系统按键</li>
+</ul>
+
+<p>如果想当然地定义两个Accessibility Service，就会在Accessibility设置列表里显示两个对象。
+<img src="http://upload-images.jianshu.io/upload_images/4075712-ba20e8275f22acd3.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="一个应用中如果有多个Accessibility Service时" /></p>
+
+<p>为了解决这个问题，需要定义一个公共的CommonAccessibility Service继承自Accessibility Service，其他模块向这个公共Service里注册监听器，当公共Service收到onAccessibilityEvent时，通过监听器分发给各个模块。</p>
+
+<h2 id="三业务过程模型">三、业务过程模型</h2>
+
+<p>核心思想：将面向过程的业务转化成面向对象的逻辑<br />
+每一种业务都可以抽象为以下流程：</p>
+
+<div style="text-align: center;"><svg height="784.873046875" version="1.1" width="514.166015625" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="overflow: hidden; position: relative; left: -0.5px; top: -0.75px;" viewBox="0 0 514.166015625 784.873046875" preserveAspectRatio="xMidYMid meet"><desc style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">Created with Raphaël 2.1.2</desc><defs style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"><path stroke-linecap="round" d="M5,0 0,2.5 5,5z" id="raphael-marker-block" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path><marker id="raphael-marker-endblock33-obj16" markerHeight="3" markerWidth="3" orient="auto" refX="1.5" refY="1.5" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#raphael-marker-block" transform="rotate(180 1.5 1.5) scale(0.6,0.6)" stroke-width="1.6667" fill="#666666" stroke="none" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></use></marker><marker id="raphael-marker-endblock33-obj17" markerHeight="3" markerWidth="3" orient="auto" refX="1.5" refY="1.5" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#raphael-marker-block" transform="rotate(180 1.5 1.5) scale(0.6,0.6)" stroke-width="1.6667" fill="#666666" stroke="none" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></use></marker><marker id="raphael-marker-endblock33-obj19" markerHeight="3" markerWidth="3" orient="auto" refX="1.5" refY="1.5" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#raphael-marker-block" transform="rotate(180 1.5 1.5) scale(0.6,0.6)" stroke-width="1.6667" fill="#666666" stroke="none" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></use></marker><marker id="raphael-marker-endblock33-obj21" markerHeight="3" markerWidth="3" orient="auto" refX="1.5" refY="1.5" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#raphael-marker-block" transform="rotate(180 1.5 1.5) scale(0.6,0.6)" stroke-width="1.6667" fill="#666666" stroke="none" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></use></marker><marker id="raphael-marker-endblock33-obj23" markerHeight="3" markerWidth="3" orient="auto" refX="1.5" refY="1.5" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#raphael-marker-block" transform="rotate(180 1.5 1.5) scale(0.6,0.6)" stroke-width="1.6667" fill="#666666" stroke="none" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></use></marker><marker id="raphael-marker-endblock33-obj25" markerHeight="3" markerWidth="3" orient="auto" refX="1.5" refY="1.5" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#raphael-marker-block" transform="rotate(180 1.5 1.5) scale(0.6,0.6)" stroke-width="1.6667" fill="#666666" stroke="none" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></use></marker><marker id="raphael-marker-endblock33-obj26" markerHeight="3" markerWidth="3" orient="auto" refX="1.5" refY="1.5" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#raphael-marker-block" transform="rotate(180 1.5 1.5) scale(0.6,0.6)" stroke-width="1.6667" fill="#666666" stroke="none" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></use></marker><marker id="raphael-marker-endblock33-obj27" markerHeight="3" markerWidth="3" orient="auto" refX="1.5" refY="1.5" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#raphael-marker-block" transform="rotate(180 1.5 1.5) scale(0.6,0.6)" stroke-width="1.6667" fill="#666666" stroke="none" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></use></marker><marker id="raphael-marker-endblock33-obj28" markerHeight="3" markerWidth="3" orient="auto" refX="1.5" refY="1.5" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#raphael-marker-block" transform="rotate(180 1.5 1.5) scale(0.6,0.6)" stroke-width="1.6667" fill="#666666" stroke="none" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></use></marker></defs><rect x="0" y="0" width="49.5625" height="35.5" rx="20" ry="20" fill="#000000" stroke="#666666" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);" fill-opacity="0" stroke-width="2" class="flowchart" id="st" transform="matrix(1,0,0,1,104.375,27.2539)"></rect><text x="10" y="17.75" text-anchor="start" font-family="&quot;Arial&quot;" font-size="14px" stroke="none" fill="#3c3c3c" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: start; font-family: Arial; font-size: 14px;" id="stt" class="flowchartt" transform="matrix(1,0,0,1,104.375,27.2539)" stroke-width="1"><tspan dy="4.75" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"> Start</tspan></text><path fill="#000000" stroke="#666666" d="M41.00390625,20.501953125L0,41.00390625L82.0078125,82.0078125L164.015625,41.00390625L82.0078125,0L0,41.00390625" stroke-width="2" fill-opacity="0" id="judgeRom" class="flowchart" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);" transform="matrix(1,0,0,1,47.1484,116.7539)"></path><text x="46.00390625" y="41.00390625" text-anchor="start" font-family="&quot;Arial&quot;" font-size="14px" stroke="none" fill="#3c3c3c" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: start; font-family: Arial; font-size: 14px;" id="judgeRomt" class="flowchartt" transform="matrix(1,0,0,1,47.1484,116.7539)" stroke-width="1"><tspan dy="4.75390625" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"> Match Rom?</tspan></text><path fill="#000000" stroke="#666666" d="M38.091796875,19.0458984375L0,38.091796875L76.18359375,76.18359375L152.3671875,38.091796875L76.18359375,0L0,38.091796875" stroke-width="2" fill-opacity="0" id="judgeRule" class="flowchart" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);" transform="matrix(1,0,0,1,52.9727,255.6738)"></path><text x="43.091796875" y="38.091796875" text-anchor="start" font-family="&quot;Arial&quot;" font-size="14px" stroke="none" fill="#3c3c3c" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: start; font-family: Arial; font-size: 14px;" id="judgeRulet" class="flowchartt" transform="matrix(1,0,0,1,52.9727,255.6738)" stroke-width="1"><tspan dy="4.763671875" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"> Math Rule?</tspan></text><rect x="0" y="0" width="250.3125" height="35.5" rx="0" ry="0" fill="#000000" stroke="#666666" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);" fill-opacity="0" stroke-width="2" class="flowchart" id="readProcess" transform="matrix(1,0,0,1,4,409.1113)"></rect><text x="10" y="17.75" text-anchor="start" font-family="&quot;Arial&quot;" font-size="14px" stroke="none" fill="#3c3c3c" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: start; font-family: Arial; font-size: 14px;" id="readProcesst" class="flowchartt" transform="matrix(1,0,0,1,4,409.1113)" stroke-width="1"><tspan dy="4.75" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">读取Process对应的Intent和ActionList</tspan></text><rect x="0" y="0" width="83.015625" height="35.5" rx="0" ry="0" fill="#000000" stroke="#666666" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);" fill-opacity="0" stroke-width="2" class="flowchart" id="executeIntent" transform="matrix(1,0,0,1,87.6484,521.8652)"></rect><text x="10" y="17.75" text-anchor="start" font-family="&quot;Arial&quot;" font-size="14px" stroke="none" fill="#3c3c3c" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: start; font-family: Arial; font-size: 14px;" id="executeIntentt" class="flowchartt" transform="matrix(1,0,0,1,87.6484,521.8652)" stroke-width="1"><tspan dy="4.75" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">执行Intent</tspan></text><rect x="0" y="0" width="108.703125" height="35.5" rx="0" ry="0" fill="#000000" stroke="#666666" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);" fill-opacity="0" stroke-width="2" class="flowchart" id="executeActions" transform="matrix(1,0,0,1,74.8047,634.6191)"></rect><text x="10" y="17.75" text-anchor="start" font-family="&quot;Arial&quot;" font-size="14px" stroke="none" fill="#3c3c3c" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: start; font-family: Arial; font-size: 14px;" id="executeActionst" class="flowchartt" transform="matrix(1,0,0,1,74.8047,634.6191)" stroke-width="1"><tspan dy="4.75" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">执行ActionList</tspan></text><rect x="0" y="0" width="44.90625" height="35.5" rx="20" ry="20" fill="#000000" stroke="#666666" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);" fill-opacity="0" stroke-width="2" class="flowchart" id="end" transform="matrix(1,0,0,1,106.7031,747.373)"></rect><text x="10" y="17.75" text-anchor="start" font-family="&quot;Arial&quot;" font-size="14px" stroke="none" fill="#3c3c3c" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: start; font-family: Arial; font-size: 14px;" id="endt" class="flowchartt" transform="matrix(1,0,0,1,106.7031,747.373)" stroke-width="1"><tspan dy="4.75" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"> End</tspan><tspan dy="16.8" x="10" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></tspan></text><rect x="0" y="0" width="140.5625" height="35.5" rx="0" ry="0" fill="#000000" stroke="#666666" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);" fill-opacity="0" stroke-width="2" class="flowchart" id="defaultProcess" transform="matrix(1,0,0,1,314.2148,276.0156)"></rect><text x="10" y="17.75" text-anchor="start" font-family="&quot;Arial&quot;" font-size="14px" stroke="none" fill="#3c3c3c" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: start; font-family: Arial; font-size: 14px;" id="defaultProcesst" class="flowchartt" transform="matrix(1,0,0,1,314.2148,276.0156)" stroke-width="1"><tspan dy="4.75" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">使用默认的Process</tspan></text><path fill="none" stroke="#666666" d="M129.15625,62.75390625C129.15625,62.75390625,129.15625,102.40800619125366,129.15625,113.75434533460066" stroke-width="2" marker-end="url(#raphael-marker-endblock33-obj16)" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path><path fill="none" stroke="#666666" d="M129.15625,198.76171875C129.15625,198.76171875,129.15625,240.93616630649194,129.15625,252.67417172992964" stroke-width="2" marker-end="url(#raphael-marker-endblock33-obj17)" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path><text x="134.15625" y="208.76171875" text-anchor="start" font-family="&quot;Arial&quot;" font-size="14px" stroke="none" fill="#3c3c3c" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: start; font-family: Arial; font-size: 14px;" stroke-width="1"><tspan dy="4.76171875" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">yes</tspan></text><path fill="none" stroke="#666666" d="M211.1640625,157.7578125C211.1640625,157.7578125,384.49609375,157.7578125,384.49609375,157.7578125C384.49609375,157.7578125,384.49609375,254.62018838198856,384.49609375,273.01836426972955" stroke-width="2" marker-end="url(#raphael-marker-endblock33-obj19)" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path><text x="216.1640625" y="147.7578125" text-anchor="start" font-family="&quot;Arial&quot;" font-size="14px" stroke="none" fill="#3c3c3c" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: start; font-family: Arial; font-size: 14px;" stroke-width="1"><tspan dy="4.7578125" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">no</tspan></text><path fill="none" stroke="#666666" d="M129.15625,331.857421875C129.15625,331.857421875,129.15625,391.86622379068285,129.15625,406.1065937765334" stroke-width="2" marker-end="url(#raphael-marker-endblock33-obj21)" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path><text x="134.15625" y="341.857421875" text-anchor="start" font-family="&quot;Arial&quot;" font-size="14px" stroke="none" fill="#3c3c3c" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: start; font-family: Arial; font-size: 14px;" stroke-width="1"><tspan dy="4.763671875" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">yes</tspan></text><path fill="none" stroke="#666666" d="M205.33984375,293.765625C205.33984375,293.765625,293.7009215056896,293.765625,311.2178148498351,293.765625" stroke-width="2" marker-end="url(#raphael-marker-endblock33-obj23)" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path><text x="210.33984375" y="283.765625" text-anchor="start" font-family="&quot;Arial&quot;" font-size="14px" stroke="none" fill="#3c3c3c" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: start; font-family: Arial; font-size: 14px;" stroke-width="1"><tspan dy="4.75" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">no</tspan></text><path fill="none" stroke="#666666" d="M129.15625,444.611328125C129.15625,444.611328125,129.15625,504.62013004068285,129.15625,518.8605000265334" stroke-width="2" marker-end="url(#raphael-marker-endblock33-obj25)" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path><path fill="none" stroke="#666666" d="M129.15625,557.365234375C129.15625,557.365234375,129.15625,617.3740362906829,129.15625,631.6144062765334" stroke-width="2" marker-end="url(#raphael-marker-endblock33-obj26)" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path><path fill="none" stroke="#666666" d="M129.15625,670.119140625C129.15625,670.119140625,129.15625,730.1279425406829,129.15625,744.3683125265334" stroke-width="2" marker-end="url(#raphael-marker-endblock33-obj27)" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path><path fill="none" stroke="#666666" d="M384.49609375,311.515625C384.49609375,311.515625,384.49609375,384.111328125,384.49609375,384.111328125C384.49609375,384.111328125,129.15625,384.111328125,129.15625,384.111328125C129.15625,384.111328125,129.15625,399.48477268218994,129.15625,406.12057589925826" stroke-width="2" marker-end="url(#raphael-marker-endblock33-obj28)" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path></svg> </div>
+
+<h4 id="31-rom机型分类">3.1 Rom——机型分类</h4>
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">RomItem</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="kt">int</span> <span class="n">mId</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="n">String</span> <span class="n">mName</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">FeatureItem</span><span class="o">&gt;</span> <span class="n">mFeatureItems</span><span class="o">;</span>
+<span class="o">}</span>
+
+<span class="kd">class</span> <span class="nc">FeatureItem</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="n">String</span> <span class="n">mKey</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="n">String</span> <span class="n">mValue</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="n">String</span> <span class="n">mCondition</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre>
+</div>
+<div class="language-json highlighter-rouge"><pre class="highlight"><code><span class="w">   </span><span class="p">{</span><span class="w">
+      </span><span class="nt">"rom_id"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+      </span><span class="nt">"rom_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"samsung"</span><span class="p">,</span><span class="w">
+      </span><span class="nt">"feature_items"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nt">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"MANUFACTURER"</span><span class="p">,</span><span class="w">
+          </span><span class="nt">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"samsung"</span><span class="p">,</span><span class="w">
+          </span><span class="nt">"condition"</span><span class="p">:</span><span class="w"> </span><span class="s2">"equal"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nt">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"SDK_INT"</span><span class="p">,</span><span class="w">
+          </span><span class="nt">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"20"</span><span class="p">,</span><span class="w">
+          </span><span class="nt">"condition"</span><span class="p">:</span><span class="w"> </span><span class="s2">"greater"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nt">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"SDK_INT"</span><span class="p">,</span><span class="w">
+          </span><span class="nt">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"23"</span><span class="p">,</span><span class="w">
+          </span><span class="nt">"condition"</span><span class="p">:</span><span class="w"> </span><span class="s2">"less"</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+</span></code></pre>
+</div>
+<h4 id="32-rule规则匹配">3.2 Rule——规则匹配</h4>
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">RuleItem</span> <span class="o">{</span>
+    <span class="kt">int</span> <span class="n">rom</span><span class="o">;</span>
+    <span class="kt">int</span> <span class="n">app</span><span class="o">;</span>
+    <span class="n">String</span> <span class="n">title</span><span class="o">;</span>
+    <span class="kt">int</span> <span class="n">processId</span><span class="o">;</span>
+    <span class="kt">int</span> <span class="n">type</span><span class="o">;</span>
+    <span class="kt">int</span> <span class="n">priority</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre>
+</div>
+<div class="language-json highlighter-rouge"><pre class="highlight"><code><span class="w">   </span><span class="p">{</span><span class="w">
+      </span><span class="nt">"rom"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+      </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"samsung-正在获取通知栏权限..."</span><span class="p">,</span><span class="w">
+      </span><span class="nt">"process_id"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">
+      </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">
+      </span><span class="nt">"priority"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="w">
+    </span><span class="p">}</span><span class="err">,</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nt">"rom"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+      </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"samsung-正在获取应用活动信息..."</span><span class="p">,</span><span class="w">
+      </span><span class="nt">"process_id"</span><span class="p">:</span><span class="w"> </span><span class="mi">408</span><span class="p">,</span><span class="w">
+      </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w">
+      </span><span class="nt">"priority"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+</span></code></pre>
+</div>
+<h4 id="33-process过程">3.3 Process——过程</h4>
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ProcessItem</span> <span class="o">{</span>
+    <span class="kt">int</span> <span class="n">mId</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="o">;</span>
+    <span class="kd">public</span> <span class="kt">int</span> <span class="n">mIntentId</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="o">;</span>
+    <span class="kd">public</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span> <span class="n">mActionIdList</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre>
+</div>
+<div class="language-json highlighter-rouge"><pre class="highlight"><code><span class="w">   </span><span class="p">{</span><span class="w">
+      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">
+      </span><span class="nt">"describe"</span><span class="p">:</span><span class="w"> </span><span class="s2">"打开通知栏权限(nexus,sony,motorola, miv7)"</span><span class="p">,</span><span class="w">
+      </span><span class="nt">"intent_id"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">
+      </span><span class="nt">"action_id"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="mi">1001</span><span class="p">,</span><span class="w">
+        </span><span class="mi">9001</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+</span></code></pre>
+</div>
+<h4 id="34-intent界面跳转">3.4 Intent——界面跳转</h4>
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">IntentItem</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kt">int</span> <span class="n">mId</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="o">;</span>
+    <span class="kd">public</span> <span class="n">String</span> <span class="n">mAction</span><span class="o">;</span>
+    <span class="kd">public</span> <span class="n">String</span> <span class="n">mActivity</span><span class="o">;</span>
+    <span class="kd">public</span> <span class="n">String</span> <span class="n">mPkgName</span><span class="o">;</span>
+    <span class="kd">public</span> <span class="n">String</span> <span class="n">mData</span><span class="o">;</span>
+    <span class="kd">public</span> <span class="n">String</span> <span class="n">mExtra</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre>
+</div>
+<div class="language-json highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="w">
+      </span><span class="nt">"id"</span><span class="p">:</span><span class="mi">4</span><span class="p">,</span><span class="w">
+      </span><span class="nt">"describe"</span><span class="p">:</span><span class="s2">"打开获取应用活动信息权限界面(samsung 5.0以上)"</span><span class="p">,</span><span class="w">
+      </span><span class="nt">"package"</span><span class="p">:</span><span class="s2">"com.android.settings"</span><span class="p">,</span><span class="w">
+      </span><span class="nt">"action"</span><span class="p">:</span><span class="s2">"android.settings.USAGE_ACCESS_SETTINGS"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre>
+</div>
+<h4 id="35-action动作">3.5 Action——动作</h4>
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ActionItem</span> <span class="kd">extends</span> <span class="n">BaseNodeInfo</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kt">int</span> <span class="n">mId</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="o">;</span>
+    <span class="kd">public</span> <span class="n">IdentifyNodeInfo</span> <span class="n">mIdentifyNodeInfo</span><span class="o">;</span>
+    <span class="kd">public</span> <span class="n">LocateNodeInfo</span> <span class="n">mLocateNodeInfo</span><span class="o">;</span>
+    <span class="kd">public</span> <span class="n">ScrollNodeInfo</span> <span class="n">mScrollNodeInfo</span><span class="o">;</span>
+    <span class="kd">public</span> <span class="n">CheckNodeInfo</span> <span class="n">mCheckNodeInfo</span><span class="o">;</span>
+    <span class="kd">public</span> <span class="n">OperationNodeInfo</span> <span class="n">mOperationNodeInfo</span><span class="o">;</span>
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="n">mNeedWaitWindow</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+    <span class="kd">public</span> <span class="kt">int</span> <span class="n">mNeedWaitTime</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre>
+</div>
+<div class="language-json highlighter-rouge"><pre class="highlight"><code><span class="w">    </span><span class="p">{</span><span class="w">
+      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">1004</span><span class="p">,</span><span class="w">
+      </span><span class="nt">"describe"</span><span class="p">:</span><span class="w"> </span><span class="s2">"打开获取应用活动信息权限"</span><span class="p">,</span><span class="w">
+      </span><span class="nt">"need_wait_window"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+      </span><span class="nt">"locate_node"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nt">"find_texts"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+          </span><span class="s2">"AppName"</span><span class="w">
+        </span><span class="p">]</span><span class="w">
+      </span><span class="p">},</span><span class="w">
+      </span><span class="nt">"scroll_node"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nt">"class_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"android.widget.ListView"</span><span class="w">
+      </span><span class="p">},</span><span class="w">
+      </span><span class="nt">"check_node"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nt">"class_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"android.widget.CheckBox"</span><span class="p">,</span><span class="w">
+        </span><span class="nt">"correct_status"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+      </span><span class="p">},</span><span class="w">
+      </span><span class="nt">"operation_node"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nt">"behavior"</span><span class="p">:</span><span class="w"> </span><span class="s2">"click"</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+</span></code></pre>
+</div>
+<h4 id="36-json实体转换">3.6 Json实体转换</h4>
+
+<h2 id="四实际应用">四、实际应用</h2>
+
+<h3 id="41-获取topactivity">4.1 获取TopActivity</h3>
+
+<p>获取TopActivity（当前前台应用）的几种方式</p>
+<ol>
+  <li>Lollipop之前, 使用ActivityManage的getRunningTasks()方法</li>
+  <li>Lollipop及以后，使用AppUsageAccess方法</li>
+  <li>AccessibiltyService方式获取</li>
+</ol>
+
+<h4 id="411-getrunningtasks方法">4.1.1 getRunningTasks()方法</h4>
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="n">ActivityManager</span> <span class="n">activityManager</span> <span class="o">=</span> <span class="o">(</span><span class="n">ActivityManager</span><span class="o">)</span><span class="n">context</span><span class="o">.</span><span class="na">getApplicationContext</span><span class="o">().</span><span class="na">getSystemService</span><span class="o">(</span><span class="n">Context</span><span class="o">.</span><span class="na">ACTIVITY_SERVICE</span><span class="o">);</span>
+<span class="n">ComponentName</span> <span class="n">runningTopActivity</span> <span class="o">=</span> <span class="n">activityManager</span><span class="o">.</span><span class="na">getRunningTasks</span><span class="o">(</span><span class="mi">1</span><span class="o">).</span><span class="na">get</span><span class="o">(</span><span class="mi">0</span><span class="o">).</span><span class="na">topActivity</span><span class="o">;</span>
+</code></pre>
+</div>
+<p>需要声明权限</p>
+<div class="language-xml highlighter-rouge"><pre class="highlight"><code><span class="nt">&lt;uses-permission</span> <span class="na">android:name=</span><span class="s">"android.permission.GET_TASKS"</span> <span class="nt">/&gt;</span>
+</code></pre>
+</div>
+<p>这种方法不止能获取包名，还能获取Activity名。但是在Android 5.0以后，系统就不再对第三方应用提供这种方式来获取前台应用了，虽然调用这个方法还是能够返回结果，但是结果只包含你自己的Activity和Launcher了。</p>
+
+<h4 id="412-app-usage-access方法">4.1.2 App Usage Access方法</h4>
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="n">UsageStatsManager</span> <span class="n">mUsageStatsManager</span> <span class="o">=</span> <span class="o">(</span><span class="n">UsageStatsManager</span><span class="o">)</span><span class="n">context</span><span class="o">.</span><span class="na">getApplicationContext</span><span class="o">().</span><span class="na">getSystemService</span><span class="o">(</span><span class="n">Context</span><span class="o">.</span><span class="na">USAGE_STATS_SERVICE</span><span class="o">);</span>
+<span class="kt">long</span> <span class="n">time</span> <span class="o">=</span> <span class="n">System</span><span class="o">.</span><span class="na">currentTimeMillis</span><span class="o">();</span>
+<span class="n">List</span><span class="o">&lt;</span><span class="n">UsageStats</span><span class="o">&gt;</span> <span class="n">stats</span> <span class="o">;</span>
+<span class="k">if</span> <span class="o">(</span><span class="n">isFirst</span><span class="o">){</span>
+    <span class="n">stats</span> <span class="o">=</span> <span class="n">mUsageStatsManager</span><span class="o">.</span><span class="na">queryUsageStats</span><span class="o">(</span><span class="n">UsageStatsManager</span><span class="o">.</span><span class="na">INTERVAL_DAILY</span><span class="o">,</span> <span class="n">time</span> <span class="o">-</span> <span class="n">TWENTYSECOND</span><span class="o">,</span> <span class="n">time</span><span class="o">);</span>
+<span class="o">}</span><span class="k">else</span> <span class="o">{</span>
+    <span class="n">stats</span> <span class="o">=</span> <span class="n">mUsageStatsManager</span><span class="o">.</span><span class="na">queryUsageStats</span><span class="o">(</span><span class="n">UsageStatsManager</span><span class="o">.</span><span class="na">INTERVAL_DAILY</span><span class="o">,</span> <span class="n">time</span> <span class="o">-</span> <span class="n">THIRTYSECOND</span><span class="o">,</span> <span class="n">time</span><span class="o">);</span>
+<span class="o">}</span>
+<span class="c1">// Sort the stats by the last time used</span>
+<span class="k">if</span><span class="o">(</span><span class="n">stats</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">TreeMap</span><span class="o">&lt;</span><span class="n">Long</span><span class="o">,</span><span class="n">UsageStats</span><span class="o">&gt;</span> <span class="n">mySortedMap</span> <span class="o">=</span> <span class="k">new</span> <span class="n">TreeMap</span><span class="o">&lt;</span><span class="n">Long</span><span class="o">,</span><span class="n">UsageStats</span><span class="o">&gt;();</span>
+    <span class="n">start</span><span class="o">=</span><span class="n">System</span><span class="o">.</span><span class="na">currentTimeMillis</span><span class="o">();</span>
+    <span class="k">for</span> <span class="o">(</span><span class="n">UsageStats</span> <span class="n">usageStats</span> <span class="o">:</span> <span class="n">stats</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">mySortedMap</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">usageStats</span><span class="o">.</span><span class="na">getLastTimeUsed</span><span class="o">(),</span><span class="n">usageStats</span><span class="o">);</span>
+    <span class="o">}</span>
+    <span class="n">LogUtil</span><span class="o">.</span><span class="na">e</span><span class="o">(</span><span class="n">TAG</span><span class="o">,</span><span class="s">"isFirst="</span><span class="o">+</span><span class="n">isFirst</span><span class="o">+</span><span class="s">",mySortedMap cost:"</span><span class="o">+</span> <span class="o">(</span><span class="n">System</span><span class="o">.</span><span class="na">currentTimeMillis</span><span class="o">()-</span><span class="n">start</span><span class="o">));</span>
+    <span class="k">if</span><span class="o">(</span><span class="n">mySortedMap</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">mySortedMap</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">())</span> <span class="o">{</span>                   
+
+        <span class="n">NavigableSet</span><span class="o">&lt;</span><span class="n">Long</span><span class="o">&gt;</span> <span class="n">keySet</span><span class="o">=</span><span class="n">mySortedMap</span><span class="o">.</span><span class="na">navigableKeySet</span><span class="o">();</span>
+        <span class="n">Iterator</span> <span class="n">iterator</span><span class="o">=</span><span class="n">keySet</span><span class="o">.</span><span class="na">descendingIterator</span><span class="o">();</span>
+        <span class="k">while</span><span class="o">(</span><span class="n">iterator</span><span class="o">.</span><span class="na">hasNext</span><span class="o">()){</span>
+            <span class="n">UsageStats</span> <span class="n">usageStats</span> <span class="o">=</span> <span class="n">mySortedMap</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">iterator</span><span class="o">.</span><span class="na">next</span><span class="o">());</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">mLastEventField</span><span class="o">==</span><span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+                <span class="k">try</span> <span class="o">{</span>
+                    <span class="n">mLastEventField</span> <span class="o">=</span> <span class="n">UsageStats</span><span class="o">.</span><span class="na">class</span><span class="o">.</span><span class="na">getField</span><span class="o">(</span><span class="s">"mLastEvent"</span><span class="o">);</span>
+                <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">NoSuchFieldException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="k">break</span><span class="o">;</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">mLastEventField</span><span class="o">!=</span><span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+                <span class="kt">int</span> <span class="n">lastEvent</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+                <span class="k">try</span> <span class="o">{</span>
+                    <span class="n">lastEvent</span> <span class="o">=</span> <span class="n">mLastEventField</span><span class="o">.</span><span class="na">getInt</span><span class="o">(</span><span class="n">usageStats</span><span class="o">);</span>
+                <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">IllegalAccessException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="k">break</span><span class="o">;</span>
+                <span class="o">}</span>
+                <span class="k">if</span> <span class="o">(</span><span class="n">lastEvent</span><span class="o">==</span><span class="mi">1</span><span class="o">){</span>
+                    <span class="n">topPackageName</span><span class="o">=</span><span class="n">usageStats</span><span class="o">.</span><span class="na">getPackageName</span><span class="o">();</span>
+                    <span class="k">break</span><span class="o">;</span>
+                <span class="o">}</span>
+            <span class="o">}</span><span class="k">else</span> <span class="o">{</span>
+                <span class="k">break</span><span class="o">;</span>
+            <span class="o">}</span>
+        <span class="o">}</span>    
+        <span class="k">if</span> <span class="o">(</span><span class="n">topPackageName</span><span class="o">==</span><span class="kc">null</span><span class="o">){</span>
+            <span class="n">topPackageName</span> <span class="o">=</span>  <span class="n">mySortedMap</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">mySortedMap</span><span class="o">.</span><span class="na">lastKey</span><span class="o">()).</span><span class="na">getPackageName</span><span class="o">();</span>
+        <span class="o">}</span>
+        <span class="n">runningTopActivity</span><span class="o">=</span><span class="k">new</span> <span class="n">ComponentName</span><span class="o">(</span><span class="n">topPackageName</span><span class="o">,</span><span class="s">""</span><span class="o">);</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">LogUtil</span><span class="o">.</span><span class="na">isDebug</span><span class="o">())</span><span class="n">LogUtil</span><span class="o">.</span><span class="na">d</span><span class="o">(</span><span class="n">TAG</span><span class="o">,</span><span class="n">topPackageName</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre>
+</div>
+<p>代码的功能是通过UsageStatsManager 来获取用户使用的程序的列表，然后按照最近使用时间排序，就得到了当前的前台应用，这种方式只能拿到包名，无法精确了Activity了。
+使用这种方发之前，首先要引导用户开启App Usage Access权限。</p>
+
+<p>需要声明权限</p>
+<div class="language-xml highlighter-rouge"><pre class="highlight"><code><span class="nt">&lt;uses-permission</span> <span class="na">android:name=</span><span class="s">"android.permission.PACKAGE_USAGE_STATS"</span> <span class="nt">/&gt;</span>
+</code></pre>
+</div>
+<p>libDeviceMonitor中获取TopActivity就是用的这种方式。</p>
+
+<h4 id="413-accessibilityservice获取">4.1.3 AccessibilityService获取</h4>
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">AccessibilityMonitorService</span> <span class="kd">extends</span> <span class="n">AccessibilityService</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="n">CharSequence</span> <span class="n">mWindowClassName</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="n">String</span> <span class="n">mCurrentPackage</span><span class="o">;</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onAccessibilityEvent</span><span class="o">(</span><span class="n">AccessibilityEvent</span> <span class="n">event</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kt">int</span> <span class="n">type</span><span class="o">=</span><span class="n">event</span><span class="o">.</span><span class="na">getEventType</span><span class="o">();</span>
+        <span class="k">switch</span> <span class="o">(</span><span class="n">type</span><span class="o">){</span>
+            <span class="k">case</span> <span class="n">AccessibilityEvent</span><span class="o">.</span><span class="na">TYPE_WINDOW_STATE_CHANGED</span><span class="o">:</span>
+                <span class="n">mWindowClassName</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="na">getClassName</span><span class="o">();</span>
+                <span class="n">mCurrentPackage</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="na">getPackageName</span><span class="o">()==</span><span class="kc">null</span><span class="o">?</span><span class="s">""</span><span class="o">:</span><span class="n">event</span><span class="o">.</span><span class="na">getPackageName</span><span class="o">().</span><span class="na">toString</span><span class="o">();</span>                
+                <span class="k">break</span><span class="o">;</span>
+            <span class="k">case</span> <span class="nl">TYPE_VIEW_CLICKED:</span>
+            <span class="k">case</span> <span class="nl">TYPE_VIEW_LONG_CLICKED:</span>
+                <span class="k">break</span><span class="o">;</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre>
+</div>
+<p>就这么简单，就可以获取当前前台应用的包名和Activity名了。
+<strong>涉及到的AccessibilityService相关知识点：</strong></p>
+<ul>
+  <li>AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
+    <ul>
+      <li><code class="highlighter-rouge">TYPE_VIEW_CLICKED</code>  View点击事件</li>
+      <li><code class="highlighter-rouge">TYPE_VIEW_LONG_CLICKED</code>  View长按事件</li>
+      <li><code class="highlighter-rouge">TYPE_VIEW_TEXT_CHANGED</code> EditText内容变化事件</li>
+      <li><code class="highlighter-rouge">TYPE_VIEW_SCROLLED</code> 界面滑动结束</li>
+      <li><code class="highlighter-rouge">TYPE_WINDOW_STATE_CHANGED</code> 代表任何界面的跳转，如Activity、Dialog、PopupWindow等</li>
+    </ul>
+  </li>
+  <li>AccessibilityEvent.getClassName()</li>
+  <li>AccessibilityEvent.getPackageName()</li>
+</ul>
+
+<h3 id="42-监听系统按键">4.2 监听系统按键</h3>
+
+<p>其实只要实现了AccessibilityService的onKeyEvent方法就可以获得按键事件了。
+先看代码：</p>
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">BigBangMonitorService</span> <span class="kd">extends</span> <span class="n">AccessibilityService</span> <span class="o">{</span>
+
+    <span class="kd">private</span> <span class="n">AccessibilityServiceInfo</span> <span class="n">mAccessibilityServiceInfo</span><span class="o">;</span>
+
+    <span class="n">String</span> <span class="n">back</span> <span class="o">;</span>
+    <span class="n">String</span> <span class="n">home</span> <span class="o">;</span>
+    <span class="n">String</span> <span class="n">recent</span> <span class="o">;</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onCreate</span><span class="o">()</span> <span class="o">{</span>
+        <span class="kd">super</span><span class="o">.</span><span class="na">onCreate</span><span class="o">();</span>
+        <span class="n">back</span> <span class="o">=</span> <span class="n">getVitualNavigationKey</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="s">"accessibility_back"</span><span class="o">,</span> <span class="s">"com.android.systemui"</span><span class="o">,</span> <span class="s">""</span><span class="o">);</span>
+        <span class="n">home</span> <span class="o">=</span> <span class="n">getVitualNavigationKey</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="s">"accessibility_home"</span><span class="o">,</span> <span class="s">"com.android.systemui"</span><span class="o">,</span> <span class="s">""</span><span class="o">);</span>
+        <span class="n">recent</span> <span class="o">=</span> <span class="n">getVitualNavigationKey</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="s">"accessibility_recent"</span><span class="o">,</span> <span class="s">"com.android.systemui"</span><span class="o">,</span> <span class="s">""</span><span class="o">);</span>
+
+        <span class="n">mAccessibilityServiceInfo</span><span class="o">=</span><span class="k">new</span> <span class="n">AccessibilityServiceInfo</span><span class="o">();</span>
+        <span class="n">mAccessibilityServiceInfo</span><span class="o">.</span><span class="na">feedbackType</span><span class="o">=</span><span class="n">FEEDBACK_GENERIC</span><span class="o">;</span>
+        <span class="n">mAccessibilityServiceInfo</span><span class="o">.</span><span class="na">eventTypes</span><span class="o">=</span><span class="n">AccessibilityEvent</span><span class="o">.</span><span class="na">TYPE_VIEW_CLICKED</span><span class="o">|</span><span class="n">AccessibilityEvent</span><span class="o">.</span><span class="na">TYPE_VIEW_LONG_CLICKED</span><span class="o">|</span><span class="n">AccessibilityEvent</span><span class="o">.</span><span class="na">TYPE_WINDOW_STATE_CHANGED</span><span class="o">;</span>
+        <span class="kt">int</span> <span class="n">flag</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">Build</span><span class="o">.</span><span class="na">VERSION</span><span class="o">.</span><span class="na">SDK_INT</span><span class="o">&gt;=</span><span class="n">Build</span><span class="o">.</span><span class="na">VERSION_CODES</span><span class="o">.</span><span class="na">LOLLIPOP</span><span class="o">){</span>
+            <span class="n">flag</span><span class="o">=</span><span class="n">flag</span><span class="o">|</span><span class="n">AccessibilityServiceInfo</span><span class="o">.</span><span class="na">FLAG_RETRIEVE_INTERACTIVE_WINDOWS</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">Build</span><span class="o">.</span><span class="na">VERSION</span><span class="o">.</span><span class="na">SDK_INT</span><span class="o">&gt;=</span><span class="n">Build</span><span class="o">.</span><span class="na">VERSION_CODES</span><span class="o">.</span><span class="na">JELLY_BEAN_MR2</span><span class="o">){</span>
+            <span class="n">flag</span><span class="o">=</span><span class="n">flag</span><span class="o">|</span><span class="n">AccessibilityServiceInfo</span><span class="o">.</span><span class="na">FLAG_REQUEST_FILTER_KEY_EVENTS</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="n">mAccessibilityServiceInfo</span><span class="o">.</span><span class="na">flags</span><span class="o">=</span><span class="n">flag</span><span class="o">;</span>
+        <span class="n">mAccessibilityServiceInfo</span><span class="o">.</span><span class="na">notificationTimeout</span><span class="o">=</span><span class="mi">100</span><span class="o">;</span>
+        <span class="n">setServiceInfo</span><span class="o">(</span><span class="n">mAccessibilityServiceInfo</span><span class="o">);</span>
+
+    <span class="o">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">protected</span> <span class="kt">boolean</span> <span class="nf">onKeyEvent</span><span class="o">(</span><span class="n">KeyEvent</span> <span class="n">paramKeyEvent</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">KeyPressedTipViewController</span><span class="o">.</span><span class="na">getInstance</span><span class="o">().</span><span class="na">onKeyEvent</span><span class="o">(</span><span class="n">paramKeyEvent</span><span class="o">);</span>
+        <span class="k">return</span> <span class="kc">false</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onAccessibilityEvent</span><span class="o">(</span><span class="n">AccessibilityEvent</span> <span class="n">event</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">//虚拟手机按键处理，优先级高于是否点击分词的判断</span>
+        <span class="k">if</span> <span class="o">((</span><span class="n">event</span><span class="o">.</span><span class="na">getEventType</span><span class="o">()</span> <span class="o">==</span> <span class="n">TYPE_VIEW_LONG_CLICKED</span><span class="o">)</span> <span class="o">&amp;&amp;</span> <span class="o">(</span><span class="s">"com.android.systemui"</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">event</span><span class="o">.</span><span class="na">getPackageName</span><span class="o">())))</span>
+        <span class="o">{</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">TextUtils</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">(</span><span class="n">event</span><span class="o">.</span><span class="na">getContentDescription</span><span class="o">())){</span>
+                <span class="k">return</span><span class="o">;</span>
+            <span class="o">}</span>
+            <span class="c1">//长按虚拟机触发的，需要转到按键处理去</span>
+            <span class="k">if</span> <span class="o">(!</span><span class="n">TextUtils</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">(</span><span class="n">back</span><span class="o">)</span> <span class="o">&amp;&amp;</span> <span class="n">event</span><span class="o">.</span><span class="na">getContentDescription</span><span class="o">().</span><span class="na">equals</span><span class="o">(</span><span class="n">back</span><span class="o">)){</span>
+                <span class="n">KeyPressedTipViewController</span><span class="o">.</span><span class="na">getInstance</span><span class="o">().</span><span class="na">onKeyLongPress</span><span class="o">(</span><span class="n">KeyEvent</span><span class="o">.</span><span class="na">KEYCODE_BACK</span><span class="o">);</span>
+            <span class="o">}</span><span class="k">else</span> <span class="k">if</span> <span class="o">(!</span><span class="n">TextUtils</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">(</span><span class="n">home</span><span class="o">)</span> <span class="o">&amp;&amp;</span> <span class="n">event</span><span class="o">.</span><span class="na">getContentDescription</span><span class="o">().</span><span class="na">equals</span><span class="o">(</span><span class="n">home</span><span class="o">)){</span>
+                <span class="n">KeyPressedTipViewController</span><span class="o">.</span><span class="na">getInstance</span><span class="o">().</span><span class="na">onKeyLongPress</span><span class="o">(</span><span class="n">KeyEvent</span><span class="o">.</span><span class="na">KEYCODE_HOME</span><span class="o">);</span>
+            <span class="o">}</span><span class="k">else</span> <span class="k">if</span> <span class="o">(!</span><span class="n">TextUtils</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">(</span><span class="n">recent</span><span class="o">)</span> <span class="o">&amp;&amp;</span> <span class="n">event</span><span class="o">.</span><span class="na">getContentDescription</span><span class="o">().</span><span class="na">equals</span><span class="o">(</span><span class="n">recent</span><span class="o">)){</span>
+                <span class="n">KeyPressedTipViewController</span><span class="o">.</span><span class="na">getInstance</span><span class="o">().</span><span class="na">onKeyLongPress</span><span class="o">(</span><span class="n">KeyEvent</span><span class="o">.</span><span class="na">KEYCODE_APP_SWITCH</span><span class="o">);</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre>
+</div>
+<ol>
+  <li>在onCreate中需要设置flag，从flag的名字上就能看出是用于声明接收key事件的，其实等同于在xml中的accessibilityFlags中添加。</li>
+  <li>跟onAccessibilityEvent中的点击事件一样，这里收到的也是异步的回调，对这些paramKeyEvent进行的修改不会影响到应用中接收事件。</li>
+  <li>你可能注意到了onAccessibilityEvent中做的处理，这是为了兼容具有NavigationBar（虚拟导航栏）的手机。因为在这些手机上，点击返回、Home、多任务三个按钮的时候，是作为普通的点击事件来处理的，也就是onAccessibilityEvent中的回调。至于代码中我只处理了TYPE_VIEW_LONG_CLICKED，则是因为单击这些键触发菜单显然是不合适的，所以没有做单击的触发方式。</li>
+  <li>KeyPressedTipViewController中的处理是跟业务逻辑相关的处理，可以不用关心，反正已经得到按键事件了，做爱做的事就行了。</li>
+</ol>
+
+<h3 id="43-获取其他app中的文字">4.3 获取其他App中的文字</h3>
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kd">private</span> <span class="n">CharSequence</span> <span class="n">mWindowClassName</span><span class="o">;</span>
+<span class="kd">private</span> <span class="n">String</span> <span class="n">mCurrentPackage</span><span class="o">;</span>
+<span class="kd">private</span> <span class="kt">int</span> <span class="n">mCurrentType</span><span class="o">;</span>
+<span class="kd">private</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span><span class="n">Integer</span><span class="o">&gt;</span> <span class="n">selections</span><span class="o">;</span><span class="c1">//保存每个应用的包名对应的触发方式</span>
+<span class="kd">private</span> <span class="kt">boolean</span> <span class="n">onlyText</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+<span class="kd">public</span>  <span class="kt">int</span> <span class="n">double_click_interval</span> <span class="o">=</span> <span class="mi">1000</span><span class="o">;</span>
+<span class="nd">@Override</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">onAccessibilityEvent</span><span class="o">(</span><span class="n">AccessibilityEvent</span> <span class="n">event</span><span class="o">)</span> <span class="o">{</span>
+    <span class="kt">int</span> <span class="n">type</span><span class="o">=</span><span class="n">event</span><span class="o">.</span><span class="na">getEventType</span><span class="o">();</span>
+    <span class="k">switch</span> <span class="o">(</span><span class="n">type</span><span class="o">){</span>
+        <span class="k">case</span> <span class="n">AccessibilityEvent</span><span class="o">.</span><span class="na">TYPE_WINDOW_STATE_CHANGED</span><span class="o">:</span>
+            <span class="n">mWindowClassName</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="na">getClassName</span><span class="o">();</span>
+            <span class="n">mCurrentPackage</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="na">getPackageName</span><span class="o">()==</span><span class="kc">null</span><span class="o">?</span><span class="s">""</span><span class="o">:</span><span class="n">event</span><span class="o">.</span><span class="na">getPackageName</span><span class="o">().</span><span class="na">toString</span><span class="o">();</span>
+            <span class="n">Integer</span> <span class="n">selectType</span><span class="o">=</span><span class="n">selections</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">mCurrentPackage</span><span class="o">);</span>
+            <span class="n">mCurrentType</span> <span class="o">=</span> <span class="n">selectType</span><span class="o">==</span><span class="kc">null</span><span class="o">?</span><span class="nl">TYPE_VIEW_NONE:</span><span class="o">(</span><span class="n">selectType</span><span class="o">+</span><span class="mi">1</span><span class="o">);</span>                
+            <span class="k">break</span><span class="o">;</span>
+        <span class="k">case</span> <span class="nl">TYPE_VIEW_CLICKED:</span>
+        <span class="k">case</span> <span class="nl">TYPE_VIEW_LONG_CLICKED:</span>
+            <span class="n">getText</span><span class="o">(</span><span class="n">event</span><span class="o">);</span>
+            <span class="k">break</span><span class="o">;</span>
+
+<span class="o">}</span>
+
+
+<span class="kd">private</span> <span class="kd">synchronized</span> <span class="kt">void</span> <span class="nf">getText</span><span class="o">(</span><span class="n">AccessibilityEvent</span> <span class="n">event</span><span class="o">){</span>        
+    <span class="kt">int</span> <span class="n">type</span><span class="o">=</span><span class="n">getClickType</span><span class="o">(</span><span class="n">event</span><span class="o">);</span>
+    <span class="n">CharSequence</span> <span class="n">className</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="na">getClassName</span><span class="o">();</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">mWindowClassName</span><span class="o">==</span><span class="kc">null</span><span class="o">){</span>
+        <span class="k">return</span><span class="o">;</span>
+    <span class="o">}</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">mWindowClassName</span><span class="o">.</span><span class="na">toString</span><span class="o">().</span><span class="na">startsWith</span><span class="o">(</span><span class="s">"com.forfan.bigbang"</span><span class="o">)){</span>
+        <span class="c1">//自己的应用不监控</span>
+        <span class="k">return</span><span class="o">;</span>
+    <span class="o">}</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">mCurrentPackage</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">event</span><span class="o">.</span><span class="na">getPackageName</span><span class="o">())){</span>        
+        <span class="k">if</span> <span class="o">(</span><span class="n">type</span><span class="o">!=</span><span class="n">mCurrentType</span><span class="o">){</span>
+            <span class="c1">//点击方式不匹配，直接返回</span>
+            <span class="k">return</span><span class="o">;</span>
+        <span class="o">}</span>
+    <span class="o">}</span><span class="k">else</span> <span class="o">{</span>
+        <span class="c1">//包名不匹配，直接返回</span>
+        <span class="k">return</span><span class="o">;</span>
+    <span class="o">}</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">className</span><span class="o">==</span><span class="kc">null</span> <span class="o">||</span> <span class="n">className</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="s">"android.widget.EditText"</span><span class="o">)){</span>
+        <span class="c1">//输入框不监控</span>
+        <span class="k">return</span><span class="o">;</span>
+    <span class="o">}</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">onlyText</span><span class="o">){</span>
+        <span class="c1">//onlyText方式下，只获取TextView的内容</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">className</span><span class="o">==</span><span class="kc">null</span> <span class="o">||</span> <span class="o">!</span><span class="n">className</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="s">"android.widget.TextView"</span><span class="o">)){</span>
+            <span class="k">if</span> <span class="o">(!</span><span class="n">hasShowTipToast</span><span class="o">){</span>
+                <span class="n">ToastUtil</span><span class="o">.</span><span class="na">show</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">string</span><span class="o">.</span><span class="na">toast_tip_content</span><span class="o">);</span>
+                <span class="n">hasShowTipToast</span><span class="o">=</span><span class="kc">true</span><span class="o">;</span>
+            <span class="o">}</span>
+            <span class="k">return</span><span class="o">;</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+    <span class="n">AccessibilityNodeInfo</span> <span class="n">info</span><span class="o">=</span><span class="n">event</span><span class="o">.</span><span class="na">getSource</span><span class="o">();</span>
+    <span class="k">if</span><span class="o">(</span><span class="n">info</span><span class="o">==</span><span class="kc">null</span><span class="o">){</span>
+        <span class="k">return</span><span class="o">;</span>
+    <span class="o">}</span>
+    <span class="n">CharSequence</span> <span class="n">txt</span><span class="o">=</span><span class="n">info</span><span class="o">.</span><span class="na">getText</span><span class="o">();</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">TextUtils</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">(</span><span class="n">txt</span><span class="o">)</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">onlyText</span><span class="o">){</span>
+        <span class="c1">//非onlyText方式下获取文字更多，但是可能并不是想要的文字</span>
+        <span class="c1">//比如系统短信页面需要这样才能获取到内容。</span>
+        <span class="n">List</span><span class="o">&lt;</span><span class="n">CharSequence</span><span class="o">&gt;</span> <span class="n">txts</span><span class="o">=</span><span class="n">event</span><span class="o">.</span><span class="na">getText</span><span class="o">();</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">txts</span><span class="o">!=</span><span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">StringBuilder</span> <span class="n">sb</span><span class="o">=</span><span class="k">new</span> <span class="n">StringBuilder</span><span class="o">();</span>
+            <span class="k">for</span> <span class="o">(</span><span class="n">CharSequence</span> <span class="n">t</span> <span class="o">:</span> <span class="n">txts</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">sb</span><span class="o">.</span><span class="na">append</span><span class="o">(</span><span class="n">t</span><span class="o">);</span>
+            <span class="o">}</span>
+            <span class="n">txt</span><span class="o">=</span><span class="n">sb</span><span class="o">.</span><span class="na">toString</span><span class="o">();</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+    <span class="k">if</span> <span class="o">(!</span><span class="n">TextUtils</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">(</span><span class="n">txt</span><span class="o">))</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">txt</span><span class="o">.</span><span class="na">length</span><span class="o">()&lt;=</span><span class="mi">2</span> <span class="o">){</span>
+            <span class="c1">//对于太短的词进行屏蔽，因为这些词往往是“发送”等功能按钮，其实应该根据不同的activity进行区分</span>
+            <span class="k">if</span> <span class="o">(!</span><span class="n">hasShowTooShortToast</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">ToastUtil</span><span class="o">.</span><span class="na">show</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">string</span><span class="o">.</span><span class="na">too_short_to_split</span><span class="o">);</span>
+                <span class="n">hasShowTooShortToast</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+            <span class="o">}</span>
+            <span class="k">return</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="c1">//打开分词功能</span>
+        <span class="n">Intent</span> <span class="n">intent</span><span class="o">=</span><span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="n">BigBangActivity</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+        <span class="n">intent</span><span class="o">.</span><span class="na">addFlags</span><span class="o">(</span><span class="n">intent</span><span class="o">.</span><span class="na">FLAG_ACTIVITY_NEW_TASK</span><span class="o">);</span>
+        <span class="n">intent</span><span class="o">.</span><span class="na">putExtra</span><span class="o">(</span><span class="n">BigBangActivity</span><span class="o">.</span><span class="na">TO_SPLIT_STR</span><span class="o">,</span><span class="n">txt</span><span class="o">.</span><span class="na">toString</span><span class="o">());</span>
+        <span class="n">startActivity</span><span class="o">(</span><span class="n">intent</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+
+<span class="kd">private</span> <span class="n">Method</span> <span class="n">getSourceNodeIdMethod</span><span class="o">;</span>
+<span class="kd">private</span> <span class="kt">long</span> <span class="n">mLastSourceNodeId</span><span class="o">;</span>
+<span class="kd">private</span> <span class="kt">long</span> <span class="n">mLastClickTime</span><span class="o">;</span>
+
+<span class="kd">private</span> <span class="kt">long</span> <span class="nf">getSourceNodeId</span><span class="o">(</span><span class="n">AccessibilityEvent</span> <span class="n">event</span><span class="o">)</span>  <span class="o">{</span>
+    <span class="c1">//用于获取点击的View的id，用于检测双击操作</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">getSourceNodeIdMethod</span><span class="o">==</span><span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">Class</span><span class="o">&lt;</span><span class="n">AccessibilityEvent</span><span class="o">&gt;</span> <span class="n">eventClass</span> <span class="o">=</span> <span class="n">AccessibilityEvent</span><span class="o">.</span><span class="na">class</span><span class="o">;</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">getSourceNodeIdMethod</span> <span class="o">=</span> <span class="n">eventClass</span><span class="o">.</span><span class="na">getMethod</span><span class="o">(</span><span class="s">"getSourceNodeId"</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">NoSuchMethodException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">getSourceNodeIdMethod</span><span class="o">!=</span><span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="o">(</span><span class="kt">long</span><span class="o">)</span> <span class="n">getSourceNodeIdMethod</span><span class="o">.</span><span class="na">invoke</span><span class="o">(</span><span class="n">event</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">IllegalAccessException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">InvocationTargetException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+    <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="o">;</span>
+<span class="o">}</span>
+
+<span class="kd">private</span> <span class="kt">int</span> <span class="nf">getClickType</span><span class="o">(</span><span class="n">AccessibilityEvent</span> <span class="n">event</span><span class="o">){</span>
+    <span class="kt">int</span> <span class="n">type</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="na">getEventType</span><span class="o">();</span>
+    <span class="kt">long</span> <span class="n">time</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="na">getEventTime</span><span class="o">();</span>
+    <span class="kt">long</span> <span class="n">id</span><span class="o">=</span><span class="n">getSourceNodeId</span><span class="o">(</span><span class="n">event</span><span class="o">);</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">type</span><span class="o">!=</span><span class="n">TYPE_VIEW_CLICKED</span><span class="o">){</span>
+        <span class="n">mLastClickTime</span><span class="o">=</span><span class="n">time</span><span class="o">;</span>
+        <span class="n">mLastSourceNodeId</span><span class="o">=-</span><span class="mi">1</span><span class="o">;</span>
+        <span class="k">return</span> <span class="n">type</span><span class="o">;</span>
+    <span class="o">}</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">id</span><span class="o">==-</span><span class="mi">1</span><span class="o">){</span>
+        <span class="n">mLastClickTime</span><span class="o">=</span><span class="n">time</span><span class="o">;</span>
+        <span class="n">mLastSourceNodeId</span><span class="o">=-</span><span class="mi">1</span><span class="o">;</span>
+        <span class="k">return</span> <span class="n">type</span><span class="o">;</span>
+    <span class="o">}</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">type</span><span class="o">==</span><span class="n">TYPE_VIEW_CLICKED</span> <span class="o">&amp;&amp;</span> <span class="n">time</span> <span class="o">-</span> <span class="n">mLastClickTime</span><span class="o">&lt;=</span> <span class="n">double_click_interval</span> <span class="o">&amp;&amp;</span> <span class="n">id</span><span class="o">==</span><span class="n">mLastSourceNodeId</span><span class="o">){</span>
+        <span class="n">mLastClickTime</span><span class="o">=-</span><span class="mi">1</span><span class="o">;</span>
+        <span class="n">mLastSourceNodeId</span><span class="o">=-</span><span class="mi">1</span><span class="o">;</span>
+        <span class="k">return</span> <span class="n">TYPE_VIEW_DOUBLD_CLICKED</span><span class="o">;</span>
+    <span class="o">}</span><span class="k">else</span> <span class="o">{</span>
+        <span class="n">mLastClickTime</span><span class="o">=</span><span class="n">time</span><span class="o">;</span>
+        <span class="n">mLastSourceNodeId</span><span class="o">=</span><span class="n">id</span><span class="o">;</span>
+        <span class="k">return</span> <span class="n">type</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre>
+</div>
+
+<p>相关知识点：</p>
+<ul>
+  <li>AccessibilityEvent.getSource()</li>
+  <li>AccessibilityNodeInfo.getText()</li>
+</ul>
+
+<h3 id="44-实现全局复制">4.4 实现全局复制</h3>
+
+<h3 id="45-清理内存forcestop">4.5 清理内存（ForceStop)</h3>
+<p>安全清理类应用清理内存的机制可能大多数Android开发者并不清楚，但是即便是普通用户也知道一个app可以在设置-&gt;应用管理里面强制停止（ForceStop）。没错，安全类应用的深度清理就是把Accessibility Service给予的模拟点击功能和FoceStop结合了起来。</p>
+
+<p><img src="http://upload-images.jianshu.io/upload_images/4075712-0ec630504378ec77.gif?imageMogr2/auto-orient/strip" alt="深度内存清理" /></p>
+
+<p>上面动画清晰的显示了内存清理的工作机制：</p>
+
+<ul>
+  <li>扫描正在运行的应用列表，得到[A,B,C,D]</li>
+  <li>通过Intent和IntentExtra，打开A的App Info界面</li>
+  <li>监听<code class="highlighter-rouge">TYPE_WINDOW_STATE_CHANGED</code>，找到Force Stop节点</li>
+  <li>对Force Stop节点，发出<code class="highlighter-rouge">ACTION_CLICK</code>，弹出确认对话框</li>
+  <li>监听<code class="highlighter-rouge">TYPE_WINDOW_STATE_CHANGED</code>，找到弹出对话框的OK节点</li>
+  <li>对OK节点，发出<code class="highlighter-rouge">ACTION_CLICK</code></li>
+  <li>发出<code class="highlighter-rouge">GLOBAL_ACTION_BACK</code>，关闭App Info界面</li>
+  <li>……</li>
+  <li>对B、C、D应用做相同处理</li>
+  <li>……</li>
+  <li>最后调起Settings的AppInfo，把前面调起的界面杀掉</li>
+  <li>存在Settings界面还在的可能，这时候发出GLOBAL_ACTION_BACK
+<strong>涉及到的AccessibilityService相关知识点</strong>
+我们可以向AccessibilityNodeInfo发送Action，常用Action如下：</li>
+  <li><code class="highlighter-rouge">ACTION_CLICK</code> 点击动作</li>
+  <li><code class="highlighter-rouge">ACTION_LONG_CLICK</code> 长按动作</li>
+  <li><code class="highlighter-rouge">ACTION_SCROLL_UP</code> 向上滑动</li>
+  <li><code class="highlighter-rouge">ACTION_SCROLL_DOWN</code> 向下滑动</li>
+  <li><code class="highlighter-rouge">ACTION_SET_TEXT</code> 设置文字内容
+    <div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="n">scrollNode</span><span class="o">.</span><span class="na">performAction</span><span class="o">(</span><span class="n">AccessibilityNodeInfo</span><span class="o">.</span><span class="na">ACTION_SCROLL_FORWARD</span><span class="o">)</span>
+</code></pre>
+    </div>
+  </li>
+</ul>
+
+<p>除此以外，还可以向AccessibilityService发出GlobalAction：</p>
+<ul>
+  <li><code class="highlighter-rouge">GLOBAL_ACTION_BACK</code> Back键</li>
+  <li><code class="highlighter-rouge">GLOBAL_ACTION_HOME</code> Home键</li>
+  <li><code class="highlighter-rouge">GLOBAL_ACTION_RECENTS</code> Recent键
+    <div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="n">mAccessibilityService</span><span class="o">.</span><span class="na">performGlobalAction</span><span class="o">(</span><span class="n">GLOBAL_ACTION_BACK</span><span class="o">)</span>
+</code></pre>
+    </div>
+  </li>
+</ul>
+
+<h3 id="46-自动权限获取">4.6 自动权限获取</h3>
+<p>工具类应用一般需要引导用户获取各种权限，比如Notification Listening、5.0以上的App Usage Access、设备管理器权限、悬浮窗权限等等。而用户经常是没有耐心去开启这么多权限的，所以我们可以在拿到Accessibility权限以后，静默开启这些权限。</p>
+
+<p><img src="http://upload-images.jianshu.io/upload_images/4075712-093a8c1313f91e9b.gif?imageMogr2/auto-orient/strip" alt="权限静默开启" /></p>
+
+<p>上图中就自动开启了Notification Listening、App Usage Access、设备管理器权限。</p>
+
+<p>50%透明红色的覆盖可以替换成不透明的动画，这样就可以在不干扰用户视觉的前提下，帮助用户开启需要的权限。</p>
+
+<h3 id="47-微信检查被删好友">4.7 微信检查被删好友</h3>
+
+<h3 id="48-devtools">4.8 DevTools</h3>
+
+<h3 id="49-抢红包插件">4.9 <del>抢红包插件</del></h3>
+
+<h3 id="410-拦截和获取短信验证码">4.10 <del>拦截和获取短信验证码</del></h3>
+
+<h3 id="411-窃取各种隐私聊天记录等">4.11 <del>窃取各种隐私、聊天记录等</del></h3>
+
+<h2 id="五-开发符合accessibility规范的应用">五、 开发符合Accessibility规范的应用</h2>
+
+<p>当App用户数或流行度增长到某个级别之后，需要考虑App的Accessibility性能，来保证App在特殊情况下对用户友好。
+大厂们都对这个方向比较重视，因为能标榜自己产品的品味、人性化等。
+Facebook还做了Accessibility Debug工具。</p>
+
+<p>浏览App的导航方式：</p>
+<ul>
+  <li>Touch Screen，最普遍</li>
+  <li>External Hareware（DPad，trackball, keyboard, etc.），其他肢体残缺人士的辅助设施</li>
+  <li>TalkBack (an accessibility service published by Google)，盲人</li>
+</ul>
+
+<h4 id="51-focus-navigation">5.1 Focus Navigation</h4>
+<p>Focus Navigation是Android平台内置的一种导航方式。
+忽视它会导致：</p>
+<ul>
+  <li>某些按钮不能被激活交互</li>
+  <li>文本的阅读顺序混乱</li>
+</ul>
+
+<h4 id="52-问题举例">5.2 问题举例</h4>
+<div class="language-xml highlighter-rouge"><pre class="highlight"><code><span class="nt">&lt;LinearLayout</span>
+        <span class="na">xmlns:android=</span><span class="s">"http://schemas.android.com/apk/res/android"</span>
+        <span class="na">android:orientation=</span><span class="s">"vertical"</span>
+        <span class="na">android:layout_width=</span><span class="s">"match_parent"</span>
+        <span class="na">android:layout_height=</span><span class="s">"wrap_content"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;TextView</span>
+              <span class="na">android:text=</span><span class="s">"Heading One"</span>
+              <span class="na">android:layout_width=</span><span class="s">"match_parent"</span>
+              <span class="na">android:layout_height=</span><span class="s">"wrap_content"</span> <span class="nt">/&gt;</span>
+        <span class="nt">&lt;Button</span>
+              <span class="na">android:text=</span><span class="s">"Action"</span>
+              <span class="na">android:layout_width=</span><span class="s">"wrap_content"</span>
+              <span class="na">android:layout_height=</span><span class="s">"wrap_content"</span> <span class="nt">/&gt;</span>
+        <span class="nt">&lt;TextView</span>
+              <span class="na">android:text=</span><span class="s">"Heading Two"</span>
+              <span class="na">android:layout_width=</span><span class="s">"match_parent"</span>
+              <span class="na">android:layout_height=</span><span class="s">"wrap_content"</span> <span class="nt">/&gt;</span>
+<span class="nt">&lt;/LinearLayout&gt;</span>
+</code></pre>
+</div>
+<p><strong>Focusable的view是哪些？</strong>
+A. the TextViews and the Button
+B. the LinearLayout and the Button</p>
+
+<p>Screen Reader的发声顺序为Heading One，Heading Two，Action。</p>
+
+<h4 id="53-如何判断一个view是否是focusable的">5.3 如何判断一个View是否是Focusable的</h4>
+
+<p><img src="/img/in-post/post-android-accessibility/accessibility_focus.png" alt="流程图" /></p>
+
+<h4 id="54-stetho">5.4 Stetho</h4>
+<p><a href="https://code.facebook.com/posts/391276077927020/android-accessibility-debugging-with-stetho/">通过Stetho调试应用的Accessibility性能</a></p>
+
+
+                <hr style="visibility: hidden;">
+
+                
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="http://lizhe.tech/2017/02/19/android-performance-optimization/index.html" data-toggle="tooltip" data-placement="top" title="Android流畅度优化之动画设计原则">
+                        Previous<br>
+                        <span>Android流畅度优化之动画设计原则</span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="http://lizhe.tech/2017/02/21/android-locker-alive/index.html" data-toggle="tooltip" data-placement="top" title="Magic Locker进程保活总结">
+                        Next<br>
+                        <span>Magic Locker进程保活总结</span>
+                        </a>
+                    </li>
+                    
+                </ul>
+
+
+                
+
+                
+
+            </div>  
+
+    <!-- Side Catalog Container -->
+        
+            <div class="
+                col-lg-2 col-lg-offset-0
+                visible-lg-block
+                sidebar-container
+                catalog-container">
+                <div class="side-catalog">
+                    <hr class="hidden-sm hidden-xs">
+                    <h5>
+                        <a class="catalog-toggle" href="#">CATALOG</a>
+                    </h5>
+                    <ul class="catalog-body"></ul>
+                </div>
+            </div>
+        
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+        				
+                            
+                				<a href="/tags/#Android" title="Android" rel="12">
+                                    Android
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#性能" title="性能" rel="2">
+                                    性能
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Accessibility" title="Accessibility" rel="2">
+                                    Accessibility
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#锁屏" title="锁屏" rel="4">
+                                    锁屏
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+        			</div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+                    
+                        <li><a href="http://gank.io/">干货集中营</a></li>
+                    
+                        <li><a href="http://mida.re/">乱序</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("//cdnjs.cloudflare.com/ajax/libs/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    
+
+
+                    
+                    
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Lizhe Blog 2017
+                    |
+                    <!-- Theme by <a href="http://huangxuan.me">Hux</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=huxpro&repo=huxpro.github.io&type=star&count=true" >
+                    </iframe> -->
+                    Powered by <a href="https://jekyllrb.com/">Jekyll</a> with <a href="https://github.com/Kaijun/hexo-theme-huxblog">Hux</a> Theme
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="http://lizhe.tech/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="http://lizhe.tech/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="http://lizhe.tech/js/hux-blog.min.js "></script>
+
+<!-- Service Worker -->
+
+<script type="text/javascript">
+    if(navigator.serviceWorker){
+        // For security reasons, a service worker can only control the pages that are in the same directory level or below it. That's why we put sw.js at ROOT level.
+        navigator.serviceWorker
+            .register('/sw.js')
+            .then((registration) => {console.log('Service Worker Registered. ', registration)})
+            .catch((error) => {console.log('ServiceWorker registration failed: ', error)})
+    }
+</script>
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/ 
+     - https://github.com/jneen/rouge/wiki/list-of-supported-languages-and-lexers   
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async('http://lizhe.tech/js/jquery.tagcloud.js',function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-49627206-1';
+    var _gaDomain = 'huangxuan.me';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+
+<!-- Side Catalog -->
+
+<script type="text/javascript">
+    function generateCatalog (selector) {
+        var P = $('div.post-container'),a,n,t,l,i,c;
+        a = P.find('h1,h2,h3,h4,h5,h6');
+        a.each(function () {
+            n = $(this).prop('tagName').toLowerCase();
+            i = "#"+$(this).prop('id');
+            t = $(this).text();
+            c = $('<a href="'+i+'" rel="nofollow">'+t+'</a>');
+            l = $('<li class="'+n+'_nav"></li>').append(c);
+            $(selector).append(l);
+        });
+        return true;    
+    }
+
+    generateCatalog(".catalog-body");
+
+    // toggle side catalog
+    $(".catalog-toggle").click((function(e){
+        e.preventDefault();
+        $('.side-catalog').toggleClass("fold")
+    }))
+
+    /*
+     * Doc: https://github.com/davist11/jQuery-One-Page-Nav
+     * Fork by Hux to support padding
+     */
+    async("http://lizhe.tech/js/jquery.nav.js", function () {
+        $('.catalog-body').onePageNav({
+            currentClass: "active",
+            changeHash: !1,
+            easing: "swing",
+            filter: "",
+            scrollSpeed: 700,
+            scrollOffset: 0,
+            scrollThreshold: .2,
+            begin: null,
+            end: null,
+            scrollChange: null,
+            padding: 80
+        });
+    });
+</script>
+
+
+
+
+
+<!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0" /> -->
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>
